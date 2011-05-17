@@ -1,0 +1,128 @@
+#!/usr/bin/env ruby
+#
+# kythera: services for TSora IRC networks
+# bin/kythera: configuration file
+#
+# Copyright (c) 2011 Eric Will <rakaur@malkier.net>
+# Rights to this code are documented in LICENSE
+#
+$LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
+require 'kythera'
+
+#
+# This is the configuration. Edit from here down.
+#
+# HOW TO USE THIS FILE:
+#
+# This file is, strictly speaking, a Ruby script. We've provided
+# methods that allow the configuration to be simple and human-readable.
+# Anything that works in Ruby will technically work here, but we
+# suggest sticking with the basics unless you know what you're doing.
+#
+# Unquoted strings are interpreted as Ruby statements. Numbers do not
+# need to be encapsulated within quotes. If your string is basic alphanumeric
+# you can use a :symbol (prefixing your string with a colon instead of
+# encapsulting it with quotations) as it is less noisy.
+#
+# The `use` statements are an extensibility feature. They allow you to
+# pull an arbitrary Ruby module's methods into the main configuration
+# parser so that you can provide configuration options for extensions.
+# If you plan to do this check out the parser in `lib/kythera.rb` first.
+#
+
+# The actual configuration begins here
+configure do
+    use Kythera::Configuration # The base configuration options
+
+    # This section of the configuration is dedicated to the general
+    # behavior of the service as a whole.
+    #
+    daemon do
+        # The name of our server
+        name 'services.int'
+
+        # The server description (seen in /LINKS)
+        description 'kythera irc services'
+
+        # The nickname of the person running this service.
+        admin :rakaur
+
+        # The email address of the person running this service.
+        email 'rakaur@malkier.net'
+
+        # How much logging should we do?
+        # In order of least verbose to most verbose:
+        # none, fatal, error, warning, info, debug
+        #
+        logging :info
+
+        # The number of seconds between uplink connection attempts.
+        reconnect_time 10
+
+        # Should we verify an email address when we come across it?
+        verify_emails false
+
+        # The full path to your mail transfer agent.
+        # This is used for things like email verification, etc.
+        #
+        mailer '/usr/sbin/sendmail'
+    end
+
+    # This section of the configuration describes the server we link to.
+    # Provide the hostname or IP address in the opening block.
+    #
+    # You can have as many of these as you like.
+    #
+    uplink 'moridin.ericw.org' do
+
+        # How important is this uplink vs other uplinks? Can be anything
+        # Can be any number, positive or negative. If missing, it's
+        # assumed to be zero.
+        #
+        priority 1;
+
+        # If you need to bind to a specific IP when connecting to the
+        # uplink specify it here. You can also specify a local port.
+        #
+        bind '204.152.222.180'
+        #bind '10.0.1.30', 55101
+
+        # The password we send to the uplink upon connection.
+        send_password :linkage
+
+        # The password we expect from the uplink upon connection.
+        accept_password :linkage
+
+        # The name of the uplink's network
+        network :malkier
+
+        # This is sort of a technical setting. The original IRC protocol
+        # was designed in Finland and had a slight quirk with the mapping
+        # of a few characters. Strict IRCds honor this. Some new IRCds do not.
+        # Almost all TSora IRCds (ircd-ratbox, ircd-hybrid, etc) will want
+        # the original, "rfc1459," and others such as bahamut and Unreal
+        # will want "ascii."
+        #
+        casemapping :rfc1459
+    end
+
+    # This section of the configuration describes the behavior of the username
+    # service. If it is not specified or is empty, userserv is disabled.
+    userserv do
+
+        # The client's nickname on IRC
+        nickname :X
+
+        # The client's username (sometimes called ident) on IRC
+        username :service
+
+        # The client's hostname on IRC
+        hostname 'services.int'
+
+        # The client's realname (sometimes called gecos) on IRC
+        realname 'kythera irc services'
+
+        # The maximum number of usernames registered to a single email address
+        max 5;
+    end
+end
