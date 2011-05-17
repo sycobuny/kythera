@@ -10,14 +10,14 @@
 
 # Starts the parsing of the configuraiton DSL
 #
-# @block [Proc] contains the actual configuration code
+# @param [Proc] block contains the actual configuration code
 def configure &block
     Kythera.config = Object.new
 
     class << Kythera.config
         # Adds methods to the parser from an arbitrary module
         #
-        # @mod [Module] the module containing methods to add
+        # @param [Module] mod the module containing methods to add
         def use mod
             Kythera.config.extend mod
         end
@@ -33,13 +33,15 @@ def configure &block
     Kythera.run
 end
 
+# Contains all of the application-wide stuff
 module Kythera
-    #
-    # Define version information in accordance with semantic versioning.
-    # http://semver.org/
-    #
+    # For backwards-incompatible changes
     V_MAJOR = 0
+
+    # For backwards-compatible changes
     V_MINOR = 0
+
+    # For minor changes and bugfixes
     V_PATCH = 1
 
     # A String representation of the version number
@@ -48,15 +50,27 @@ module Kythera
     # Application-wide configuraiton settings
     @@config = nil
 
-    # Configuration accessors
-    def self.config; @@config; end
-    def self.config=(config); @@config = config; end
+    # Configuration reader
+    #
+    # @return [Object] the configuration settings
+    def self.config
+        @@config
+    end
 
-    # Verify that the configuration isn't invalid or incomplete
+    # Configuration writer
+    #
+    # @param [Object] config a plain Object for the configuration
+    # @return [Object] the new configuration settings
+    def self.config= config
+        @@config = config
+    end
+
+    # Verifies that the configuration isn't invalid or incomplete
     def self.verify_configuration
         puts "XXX - configuration verification!"
     end
 
+    # Gets the ball rolling...
     def self.run
         puts "kythera: version #{VERSION} [#{RUBY_PLATFORM}]"
         puts "kythera: configuration parsed."
@@ -64,6 +78,7 @@ module Kythera
     end
 end
 
+# Contains the methods that actually implement the configuration
 module Kythera::Configuration
     # Parses the `daemon` section of the configuration
     def daemon
