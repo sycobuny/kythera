@@ -7,6 +7,7 @@
 #
 
 # Require all of our files here and only here
+require 'kythera/loggable'
 require 'kythera/run'
 
 # Starts the parsing of the configuraiton DSL

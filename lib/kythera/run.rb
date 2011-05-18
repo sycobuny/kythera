@@ -6,9 +6,10 @@
 # Rights to this code are documented in LICENSE
 #
 
-require 'optparse'
-
 require 'kythera'
+
+require 'logger'
+require 'optparse'
 
 module Kythera
     # Gets the ball rolling...
@@ -26,6 +27,7 @@ module Kythera
 
         # Some defaults for state
         logging  = true
+        logger   = nil
         debug    = false
         willfork = RUBY_PLATFORM =~ /win32/i ? false : true
         wd       = Dir.getwd
@@ -66,11 +68,17 @@ module Kythera
         # Time to fork...
         if willfork
             Kythera.daemonize wd
+
+            if logging or debug
+                Dir.mkdir 'var' unless File.exists? 'var'
+                logger = Logger.new('var/kythera.log', 'weekly')
+            end
         else
             puts "#{ME}: pid #{Process.pid}"
             puts "#{ME}: running in foreground mode from #{wd}"
 
-            # XXX Foreground logging
+            # Foreground logging
+            logger = Logger.new($stdout) if logging or debug
         end
 
         # Write a pid file
@@ -80,6 +88,7 @@ module Kythera
         # XXX - connect to uplink!
 
         # If we get to here we're exiting
+        logger.close if logger
         self.exit_app
     end
 
@@ -143,11 +152,13 @@ module Kythera
     end
 
     # Forks into the background and exits the parent
+    #
+    # @param [String] wd the directory to move into once forked
     def self.daemonize(wd)
         begin
             pid = fork
         rescue Exception => err
-            puts "#{ME}: unable to daemonize"
+            puts "#{ME}: unable to daemonize: #{err}"
             abort
         end
 
@@ -160,13 +171,10 @@ module Kythera
 
         # This is the child process
         Dir.chdir wd
-
-        # XXX logging
     end
 
     # Cleans up before exiting
     def self.exit_app
-        # XXX logger
         File.delete 'var/kythera.pid'
         exit
     end
