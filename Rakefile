@@ -14,12 +14,19 @@ require 'kythera'
 
 task :default => :test
 
+task :clean => ['clean:rbc', 'clean:doc']
+
 namespace :clean do
     desc 'Remove all rbc files'
     task :rbc do
         files = Dir['*.rbc'] + Dir['**/*.rbc']
-        rm_f files, :verbose => $verbose unless files.empty?
+        rm_f files, :verbose => true unless files.empty?
     end
+
+	desc 'Remove YARD files'
+	task :doc do
+		rm_rf %w(doc .yardoc), :verbose => true
+	end
 end
 
 Rake::TestTask.new :test do |test|
