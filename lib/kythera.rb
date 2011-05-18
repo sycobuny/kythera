@@ -12,7 +12,7 @@ require 'kythera/run'
 # Starts the parsing of the configuraiton DSL
 #
 # @param [Proc] block contains the actual configuration code
-def configure &block
+def configure(&block)
     Kythera.config = Object.new
 
     class << Kythera.config
@@ -65,13 +65,13 @@ module Kythera
     #
     # @param [Object] config a plain Object for the configuration
     # @return [Object] the new configuration settings
-    def self.config= config
+    def self.config=(config)
         @@config = config
     end
 
     # Verifies that the configuration isn't invalid or incomplete
     def self.verify_configuration
-        puts "#{ME}: XXX - configuration verification!"
+        # XXX - configuration verification
     end
 end
 
@@ -82,7 +82,7 @@ module Kythera::Configuration
     end
 
     # Parses the `uplink` section of the configuration
-    def uplink name
+    def uplink(name)
     end
 
     # Parses the `userserv` section of the configuration

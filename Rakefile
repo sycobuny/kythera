@@ -23,6 +23,6 @@ namespace :clean do
 end
 
 Rake::TestTask.new :test do |test|
-    puts "XXX - no tests yet!"
+    # XXX - no tests yet!
     test.pattern = 'test/**/*_test.rb'
 end

@@ -20,6 +20,10 @@ module Kythera
         Kythera.check_ruby_version
         Kythera.require_dependencies
 
+        # Handle some signals
+        trap(:INT)  { self.exit_app }
+        trap(:TERM) { self.exit_app }
+
         # Some defaults for state
         logging  = true
         debug    = false
@@ -43,15 +47,40 @@ module Kythera
 
         begin
             opts.parse(*ARGV)
-        rescue OptionParser::ParseError => e
-            puts e, opts
+        rescue OptionParser::ParseError => err
+            puts err, opts
             abort
         end
 
-        # Interpreter warnings
-        $-w = true if debug
+        # Debugging stuff
+        if debug
+            $-w = true
 
-        puts "#{ME}: i don't do anything else yet, but bravo, brave one."
+            puts "#{ME}: warning: debug mode enabled"
+            puts "#{ME}: warning: all activity will be logged in the clear"
+        end
+
+        # Are we already running?
+        Kythera.check_running
+
+        # Time to fork...
+        if willfork
+            Kythera.daemonize wd
+        else
+            puts "#{ME}: pid #{Process.pid}"
+            puts "#{ME}: running in foreground mode from #{wd}"
+
+            # XXX Foreground logging
+        end
+
+        # Write a pid file
+        Dir.mkdir 'var' unless File.exists? 'var'
+        open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
+
+        # XXX - connect to uplink!
+
+        # If we get to here we're exiting
+        self.exit_app
     end
 
     # Checks to see if we're running as root
@@ -90,11 +119,55 @@ module Kythera
                 lib = m
                 require lib
             end
-        rescue LoadError => e
+        rescue LoadError
             puts "#{ME}: could not load #{lib}"
             puts "#{ME}: this library is required for operation"
             puts "#{ME}: gem install --remote #{lib}"
             abort
         end
+    end
+
+    # Checks for an existing pid file and running daemon
+    def self.check_running
+        return unless File.exists? 'var/kythera.pid'
+
+        currpid = File.read('var/kythera.pid').chomp.to_i rescue nil
+        running = Process.kill(0, currpid) rescue nil
+
+        if not running or currpid == 0
+            File.delete 'var/kythera.pid'
+        else
+            puts "#{ME}: daemon is already running"
+            abort
+        end
+    end
+
+    # Forks into the background and exits the parent
+    def self.daemonize(wd)
+        begin
+            pid = fork
+        rescue Exception => err
+            puts "#{ME}: unable to daemonize"
+            abort
+        end
+
+        # This is the parent process
+        if pid
+            puts "#{ME}: pid #{pid}"
+            puts "#{ME}: running in background mode from #{Dir.getwd}"
+            exit
+        end
+
+        # This is the child process
+        Dir.chdir wd
+
+        # XXX logging
+    end
+
+    # Cleans up before exiting
+    def self.exit_app
+        # XXX logger
+        File.delete 'var/kythera.pid'
+        exit
     end
 end
