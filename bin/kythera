@@ -44,11 +44,8 @@ configure do
         # The server description (seen in /LINKS)
         description 'kythera irc services'
 
-        # The nickname of the person running this service.
-        admin :rakaur
-
-        # The email address of the person running this service.
-        email 'rakaur@malkier.net'
+        # The nickname and email address of the person running this service.
+        admin :rakaur, 'rakaur@malkier.net'
 
         # How much logging should we do?
         # In order of least verbose to most verbose:
@@ -91,7 +88,7 @@ configure do
         send_password :linkage
 
         # The password we expect from the uplink upon connection.
-        accept_password :linkage
+        receive_password :linkage
 
         # The name of the uplink's network
         network :malkier

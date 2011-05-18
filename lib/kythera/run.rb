@@ -154,6 +154,7 @@ module Kythera
     # Forks into the background and exits the parent
     #
     # @param [String] wd the directory to move into once forked
+    #
     def self.daemonize(wd)
         begin
             pid = fork
