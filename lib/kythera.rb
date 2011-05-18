@@ -6,7 +6,8 @@
 # Rights to this code are documented in LICENSE
 #
 
-# XXX - Require all of our files here and only here
+# Require all of our files here and only here
+require 'kythera/run'
 
 # Starts the parsing of the configuraiton DSL
 #
@@ -47,6 +48,9 @@ module Kythera
     # A String representation of the version number
     VERSION = "#{V_MAJOR}.#{V_MINOR}.#{V_PATCH}"
 
+    # Our name for things we print out
+    ME = 'kythera'
+
     # Application-wide configuraiton settings
     @@config = nil
 
@@ -67,14 +71,7 @@ module Kythera
 
     # Verifies that the configuration isn't invalid or incomplete
     def self.verify_configuration
-        puts "XXX - configuration verification!"
-    end
-
-    # Gets the ball rolling...
-    def self.run
-        puts "kythera: version #{VERSION} [#{RUBY_PLATFORM}]"
-        puts "kythera: configuration parsed."
-        puts "kythera: i don't do anything else yet, but bravo, brave one."
+        puts "#{ME}: XXX - configuration verification!"
     end
 end
 
