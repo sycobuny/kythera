@@ -16,7 +16,6 @@ module Loggable
     # That means this could break, and it's not "right."
     #
     class Formatter
-
         # String to use for formatting
         FORMAT = "%s, [%s] %s: %s\n"
 
@@ -34,11 +33,13 @@ module Loggable
         #
         def call(severity, time, progname, msg)
             datetime = time.strftime('%m/%d %H:%M:%S')
+            progname = caller[3].split('/')[-1]
 
             # Include filename, line number, and method name in debug
             if severity == "DEBUG"
-                progname.gsub!(PN_RE, '')
+                progname.gsub!(PN_RE,       '')
                 progname.gsub!('block in ', '')
+
                 "[%s] %s: %s\n" % [datetime, progname, msg]
             else
                 "[%s] %s\n" % [datetime, msg]
@@ -46,14 +47,9 @@ module Loggable
         end
     end
 
-    # Logs a regular message
-    #
-    # @param [String] message the string to log
-    #
-    def log(level, message)
-        return unless level.to_s =~ /(fatal|error|warning|info|debug)/
-
-        @logger.send(level, caller[0].split('/')[-1]) { message } if @logger
+    # Returns our proxy logger so we can do `log.info` instead of `@logger.info`
+    def log
+        @logger
     end
 
     # Sets the logging object to use
@@ -61,14 +57,21 @@ module Loggable
     # @param [Logger] logger the Logger to use (duck typing works fine here)
     #
     def logger=(logger)
-        logger.level = @logger.level if @logger and logger
-
-        @logger = logger
 
         # Set to false/nil to disable logging...
-        return unless @logger
+        unless logger
+            @logger = nil
+            return
+        end
 
-        @logger.formatter = Formatter.new
+        if @logger
+            logger.level     = @logger.level
+            logger.formatter = @logger.formatter
+            @logger          = logger
+        else
+            logger.formatter = Formatter.new
+            @logger          = logger
+        end
     end
 
     # Sets the level at which we actually log

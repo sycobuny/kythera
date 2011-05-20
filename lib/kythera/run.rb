@@ -19,7 +19,6 @@ module Kythera
         # Run through some startup tests
         Kythera.check_for_root
         Kythera.check_ruby_version
-        Kythera.require_dependencies
 
         # Handle some signals
         trap(:INT)  { self.exit_app }
@@ -85,7 +84,17 @@ module Kythera
         Dir.mkdir 'var' unless File.exists? 'var'
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
 
-        # XXX - connect to uplink!
+        # connect to the first uplink and start the main loop
+        # XXX - local binding is not implemented because of cool.io!
+        ul                      = @@config.uplinks[0]
+        ul.connection           = Connection.connect(ul.name, ul.port)
+        ul.connection.logger    = logger if logging or debug
+        ul.connection.log_level = debug ? :debug : @@config.me.logging
+        ul.connection.attach      Cool.io::Loop.default
+
+        # Main loop
+        io_loop = Cool.io::Loop.default
+        loop { io_loop.run_once }
 
         # If we get to here we're exiting
         logger.close if logger
@@ -117,22 +126,6 @@ module Kythera
 
         unless defined? Rubinius
             puts "#{ME}: runs best on Rubinius (http://rubini.us/)"
-        end
-    end
-
-    # Requires our dependencies
-    def self.require_dependencies
-        begin
-            lib = nil
-            %w(rubygems cool.io sequel sqlite3).each do |m|
-                lib = m
-                require lib
-            end
-        rescue LoadError
-            puts "#{ME}: could not load #{lib}"
-            puts "#{ME}: this library is required for operation"
-            puts "#{ME}: gem install --remote #{lib}"
-            abort
         end
     end
 

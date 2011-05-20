@@ -70,7 +70,7 @@ configure do
     #
     # You can have as many of these as you like.
     #
-    uplink 'moridin.ericw.org' do
+    uplink 'moridin.ericw.org', 6667 do
 
         # How important is this uplink vs other uplinks? Can be anything
         # Can be any number, positive or negative. If missing, it's
@@ -80,6 +80,8 @@ configure do
 
         # If you need to bind to a specific IP when connecting to the
         # uplink specify it here. You can also specify a local port.
+        #
+        # XXX - This isn't actually implemented yet because of cool.io.
         #
         bind '204.152.222.180'
         #bind '10.0.1.30', 55101

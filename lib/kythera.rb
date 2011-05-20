@@ -6,7 +6,22 @@
 # Rights to this code are documented in LICENSE
 #
 
+# Check for our dependencies before doing _anything_ else
+begin
+    lib = nil
+    %w(rubygems cool.io sequel sqlite3).each do |m|
+        lib = m
+        require lib
+    end
+rescue LoadError
+    puts "kythera: could not load #{lib}"
+    puts "kythera: this library is required for operation"
+    puts "kythera: gem install --remote #{lib}"
+    abort
+end
+
 # Require all of our files here and only here
+require 'kythera/connection'
 require 'kythera/loggable'
 require 'kythera/run'
 
@@ -76,9 +91,12 @@ module Kythera
         @@config = config
     end
 
+    @@uplink = nil
+
     # Verifies that the configuration isn't invalid or incomplete
     def self.verify_configuration
         # XXX - configuration verification
+        @@config.uplinks.sort! { |a, b| a.priority <=> b.priority }
     end
 end
 
@@ -111,9 +129,10 @@ module Kythera::Configuration
     # @param [String] name the server name
     # @param [Proc] block contains the actual configuraiton code
     #
-    def uplink(name, &block)
+    def uplink(name, port = 6667, &block)
         ul      = OpenStruct.new
         ul.name = name
+        ul.port = port
 
         ul.extend Kythera::Configuration::Uplink
         ul.instance_eval &block
@@ -137,7 +156,7 @@ end
 # Implements the daemon section of the configuration
 #
 # If you're writing an extension that needs to add settings here,
-# you should provide your own via `use`:
+# you should provide your own via `use`.
 #
 # @example Extend the daemon settings
 #     daemon do
@@ -193,7 +212,7 @@ end
 # Implements the uplink section of the configuration
 #
 # If you're writing an extension that needs to add settings here,
-# you should provide your own via `use`:
+# you should provide your own via `use`.
 #
 # @example Extend the uplink settings
 #     uplink 'some.up.link' do
@@ -247,7 +266,7 @@ end
 # Implements the userserv section of the configuration
 #
 # If you're writing an extension that needs to add settings here,
-# you should provide your own via `use`:
+# you should provide your own via `use`.
 #
 # @example Extend the userserv settings
 #     userserv do
