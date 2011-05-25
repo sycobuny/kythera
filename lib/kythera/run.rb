@@ -141,22 +141,27 @@ class Kythera
         if @uplink
             log.debug "current uplink failed, trying next"
 
-            curruli  = @@config.uplinks.find_index(@uplink)
+            @uplink.connection.uplink = nil # Ugh... cool.io sucks
+
+            curruli  = @@config.uplinks.find_index(@uplink.config)
             curruli += 1
             curruli  = 0 if curruli > (@@config.uplinks.length - 1)
 
-            @uplink  = @@config.uplinks[curruli]
+            @uplink.config = @@config.uplinks[curruli]
 
             sleep @@config.me.reconnect_time
         else
-            @uplink = @@config.uplinks[0]
+            @uplink           = Uplink.new @@config.uplinks[0]
+            @uplink.logger    = @logger if @logger
+            @uplink.log_level = @@config.me.logging
         end
 
-        log.info "connecting to #{@uplink.name}:#{@uplink.port}"
+        log.info "connecting to #{@uplink}"
 
         conn           = Connection.connect(@uplink.name, @uplink.port)
         conn.logger    = @logger if @logger
         conn.log_level = @@config.me.logging
+        conn.uplink    = @uplink
         conn.attach      @io_loop
 
         @uplink.connection = conn
@@ -185,7 +190,7 @@ class Kythera
             Encoding.default_external = 'UTF-8'
         end
 
-        unless defined? Rubinius
+        if defined? RUBY_ENGINE and RUBY_ENGINE != 'rbx'
             puts "#{ME}: runs best on Rubinius (http://rubini.us/)"
         end
     end

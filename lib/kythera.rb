@@ -24,6 +24,7 @@ end
 require 'kythera/connection'
 require 'kythera/loggable'
 require 'kythera/run'
+require 'kythera/uplink'
 
 require 'ostruct'
 
@@ -262,6 +263,10 @@ module Kythera::Configuration::Uplink
 
     def network(name)
         self.network = name
+    end
+
+    def protocol(protocol)
+        self.protocol = protocol
     end
 
     def casemapping(mapping)

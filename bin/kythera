@@ -63,6 +63,9 @@ configure do
         # This is used for things like email verification, etc.
         #
         mailer '/usr/sbin/sendmail'
+
+        # To make sure you're reading :)
+        # XXX abort "You didn't read your configuration file!"
     end
 
     # This section of the configuration describes the server we link to.
@@ -95,6 +98,12 @@ configure do
         # The name of the uplink's network
         network :malkier
 
+        # The protocol that your ircd speaks for server-to-server links.
+        # For ircd-ratbox this is `ts6`, other ircds may be supported
+        # in the future.
+        #
+        protocol :ts6
+
         # This is sort of a technical setting. The original IRC protocol
         # was designed in Finland and had a slight quirk with the mapping
         # of a few characters. Strict IRCds honor this. Some new IRCds do not.
@@ -104,6 +113,9 @@ configure do
         #
         casemapping :rfc1459
     end
+
+    # Still reading... :)
+    # XXX abort "You really should read ALL of your configuration file!"
 
     # This section of the configuration describes the behavior of the username
     # service. If it is not specified or is empty, userserv is disabled.
