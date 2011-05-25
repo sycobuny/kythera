@@ -51,11 +51,11 @@ def configure(&block)
     Kythera.verify_configuration
 
     # Configuration is solid, now let's actually start up
-    Kythera.run
+    Kythera.new
 end
 
 # Contains all of the application-wide stuff
-module Kythera
+class Kythera
     # For backwards-incompatible changes
     V_MAJOR = 0
 
@@ -91,7 +91,13 @@ module Kythera
         @@config = config
     end
 
-    @@uplink = nil
+    # The currently running instance of self (this may disappear)
+    #
+    # @return [Kythera] self
+    #
+    def self.app
+        @@app
+    end
 
     # Verifies that the configuration isn't invalid or incomplete
     def self.verify_configuration

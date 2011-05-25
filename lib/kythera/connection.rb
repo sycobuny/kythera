@@ -13,17 +13,30 @@ require 'kythera/loggable'
 class Connection < Cool.io::TCPSocket
     include Loggable
 
+    public
+
+    def connected?
+        @connected
+    end
+
+    private
+
     # Called when a connection is established
     def on_connect
+        @connected = true
+
         log.info "successfully connected to #{@remote_host}:#{@remote_port}"
     end
 
     # Called when a connection fails
     def on_connect_failed
+        @connected = false
     end
 
     # Called when the connection is closed or lost
     def on_close
+        @connected = false
+
         log.info "lost connection to #{@remote_host}:#{@remote_port}"
         # XXX events here...
     end

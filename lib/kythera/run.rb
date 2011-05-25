@@ -11,22 +11,26 @@ require 'kythera'
 require 'logger'
 require 'optparse'
 
-module Kythera
+class Kythera
+    include Loggable
+
     # Gets the ball rolling...
-    def self.run
+    def initialize
+        @@app = self
+
         puts "#{ME}: version #{VERSION} [#{RUBY_PLATFORM}]"
 
         # Run through some startup tests
-        Kythera.check_for_root
-        Kythera.check_ruby_version
+        check_for_root
+        check_ruby_version
 
         # Handle some signals
-        trap(:INT)  { self.exit_app }
-        trap(:TERM) { self.exit_app }
+        trap(:INT)  { exit_app }
+        trap(:TERM) { exit_app }
 
         # Some defaults for state
         logging  = true
-        logger   = nil
+        @logger  = nil
         debug    = false
         willfork = RUBY_PLATFORM =~ /win32/i ? false : true
         wd       = Dir.getwd
@@ -56,53 +60,110 @@ module Kythera
         # Debugging stuff
         if debug
             $-w = true
+            @@config.me.logging = :debug
 
             puts "#{ME}: warning: debug mode enabled"
             puts "#{ME}: warning: all activity will be logged in the clear"
         end
 
         # Are we already running?
-        Kythera.check_running
+        check_running
 
         # Time to fork...
         if willfork
-            Kythera.daemonize wd
+            daemonize wd
 
             if logging or debug
                 Dir.mkdir 'var' unless File.exists? 'var'
-                logger = Logger.new('var/kythera.log', 'weekly')
+                self.logger = Logger.new('var/kythera.log', 'weekly')
             end
         else
             puts "#{ME}: pid #{Process.pid}"
             puts "#{ME}: running in foreground mode from #{wd}"
 
             # Foreground logging
-            logger = Logger.new($stdout) if logging or debug
+            self.logger = Logger.new($stdout) if logging or debug
         end
+
+        self.log_level = @@config.me.logging if logging or debug
 
         # Write a pid file
         Dir.mkdir 'var' unless File.exists? 'var'
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
 
-        # connect to the first uplink and start the main loop
-        # XXX - local binding is not implemented because of cool.io!
-        ul                      = @@config.uplinks[0]
-        ul.connection           = Connection.connect(ul.name, ul.port)
-        ul.connection.logger    = logger if logging or debug
-        ul.connection.log_level = debug ? :debug : @@config.me.logging
-        ul.connection.attach      Cool.io::Loop.default
-
-        # Main loop
-        io_loop = Cool.io::Loop.default
-        loop { io_loop.run_once }
+        # Enter the main event loop
+        main_loop
 
         # If we get to here we're exiting
-        logger.close if logger
-        self.exit_app
+        exit_app
+    end
+
+    private
+
+    # Runs the entire event-based app
+    #
+    # Once we enter this loop we only leave it to exit the app.
+    # This makes sure we're connected and handles events, timers, and I/O
+    #
+    def main_loop
+        @io_loop = Cool.io::Loop.default
+
+        loop do
+            # XXX - dead connections?
+            # XXX - EventQueue, etc?
+
+            # If it's true we're connectED, if it's nil we're connectING
+            connect if connected? == false
+
+            # Do I/O... most of the code runs from here
+            @io_loop.run_once
+        end
+    end
+
+    # Are we connected to the uplink?
+    #
+    # @return [Boolean] true for yes, false for no, nil for trying to
+    #
+    def connected?
+        if @uplink
+            @uplink.connection.connected?
+        else
+            false
+        end
+    end
+
+    # Connects to the uplink
+    # XXX - local binding is not implemented in cool.io!
+    #
+    # @return [Connection] the current cool.io socket
+    #
+    def connect
+        if @uplink
+            log.debug "current uplink failed, trying next"
+
+            curruli  = @@config.uplinks.find_index(@uplink)
+            curruli += 1
+            curruli  = 0 if curruli > (@@config.uplinks.length - 1)
+
+            @uplink  = @@config.uplinks[curruli]
+
+            sleep @@config.me.reconnect_time
+        else
+            @uplink = @@config.uplinks[0]
+        end
+
+        log.info "connecting to #{@uplink.name}:#{@uplink.port}"
+
+        conn           = Connection.connect(@uplink.name, @uplink.port)
+        conn.logger    = @logger if @logger
+        conn.log_level = @@config.me.logging
+        conn.attach      @io_loop
+
+        @uplink.connection = conn
     end
 
     # Checks to see if we're running as root
-    def self.check_for_root
+    def check_for_root
         if Process.euid == 0
             puts "#{ME}: refuses to run as root"
             abort
@@ -110,7 +171,7 @@ module Kythera
     end
 
     # Checks to see if we're running on a decent Ruby version
-    def self.check_ruby_version
+    def check_ruby_version
         if RUBY_VERSION < '1.9' and RUBY_VERSION < '1.8.7'
             puts "#{ME}: requires at least Ruby version 1.8.7"
             puts "#{ME}: you have #{RUBY_VERSION}"
@@ -130,7 +191,7 @@ module Kythera
     end
 
     # Checks for an existing pid file and running daemon
-    def self.check_running
+    def check_running
         return unless File.exists? 'var/kythera.pid'
 
         currpid = File.read('var/kythera.pid').chomp.to_i rescue nil
@@ -148,7 +209,7 @@ module Kythera
     #
     # @param [String] wd the directory to move into once forked
     #
-    def self.daemonize(wd)
+    def daemonize(wd)
         begin
             pid = fork
         rescue Exception => err
@@ -168,7 +229,8 @@ module Kythera
     end
 
     # Cleans up before exiting
-    def self.exit_app
+    def exit_app
+        @logger.close if @logger
         File.delete 'var/kythera.pid'
         exit
     end
