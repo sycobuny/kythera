@@ -22,7 +22,6 @@ class Uplink
         @connection = nil
 
         # Include the methods for the protocol we're using
-        require "kythera/protocol/#{@config.protocol.to_s.downcase}"
         extend Protocol.const_get(@config.protocol)
     end
 

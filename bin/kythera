@@ -102,6 +102,8 @@ configure do
         # For ircd-ratbox this is `TS6`, other ircds may be supported
         # in the future.
         #
+        # This is case sensitive!
+        #
         protocol :TS6
 
         # This is sort of a technical setting. The original IRC protocol
