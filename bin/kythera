@@ -99,10 +99,10 @@ configure do
         network :malkier
 
         # The protocol that your ircd speaks for server-to-server links.
-        # For ircd-ratbox this is `ts6`, other ircds may be supported
+        # For ircd-ratbox this is `TS6`, other ircds may be supported
         # in the future.
         #
-        protocol :ts6
+        protocol :TS6
 
         # This is sort of a technical setting. The original IRC protocol
         # was designed in Finland and had a slight quirk with the mapping
