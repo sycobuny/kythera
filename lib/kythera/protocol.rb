@@ -11,4 +11,8 @@ module Protocol
     def self.find(mod)
         Protocol.const_get Protocol.constants.find { |c| c =~ /^#{mod}$/i }
     end
+
+    private
+
+    # XXX ...
 end

@@ -73,7 +73,7 @@ configure do
     #
     # You can have as many of these as you like.
     #
-    uplink 'moridin.ericw.org', 6667 do
+    uplink 'moridin.ericw.org', 6699 do
 
         # How important is this uplink vs other uplinks? Can be anything
         # Can be any number, positive or negative. If missing, it's
@@ -90,10 +90,10 @@ configure do
         #bind '10.0.1.30', 55101
 
         # The password we send to the uplink upon connection.
-        send_password :linkage
+        send_password :send_linkage
 
         # The password we expect from the uplink upon connection.
-        receive_password :linkage
+        receive_password :receive_linkage
 
         # The name of the uplink's network
         network :malkier
@@ -103,6 +103,11 @@ configure do
         # in the future.
         #
         protocol :ts6
+
+        # The server ID we should send to the uplink. If you're using `ts6`
+        # above, this must be set. The format is [0-9][A-Z0-9][A-Z0-9].
+        #
+        sid '0X0'
 
         # This is sort of a technical setting. The original IRC protocol
         # was designed in Finland and had a slight quirk with the mapping

@@ -16,12 +16,16 @@ class Uplink
     # The cool.io socket
     attr_accessor :connection
 
+    # The receive-queue, which holds lines waiting to be parsed
+    attr_accessor :recvq
+
     # Creates a new Uplink and includes the protocol-specific methods
     def initialize(config)
-        @config     = config
-        @connection = nil
+        @config = config
+        @recvq  = []
 
         # Include the methods for the protocol we're using
+        extend Protocol
         extend Protocol.find(@config.protocol)
     end
 
@@ -59,11 +63,45 @@ class Uplink
         @connection ? @connection.connected? : false
     end
 
+    # Called by Connection when we're connected
+    def connection_established
+        send_pass
+        send_capab
+        send_server
+        send_svinfo
+    end
+
+    def write(data)
+        log.debug "<- #{data}"
+        data += "\r\n"
+        @connection.write data
+    end
+
+    NO_COL = 1 .. -1
+
     # Parses incoming IRC data and sends it off to protocol-specific handlers
-    #
-    # @param [String] data data from the IRC server
-    #
-    def parse(data)
-        # XXX - parse data!
+    def parse
+        while line = recvq.shift
+            line.chomp!
+
+            log.debug "-> #{line}"
+
+            if line[0].chr == ':'
+                # Remove the origin from the line, and eat the colon
+                origin, line = line.split(' ', 2)
+                origin = origin[NO_COL]
+            else
+                origin = nil
+            end
+
+            tokens, args = line.split(' :')
+            parv = tokens.split(' ')
+            cmd  = parv.delete_at(0)
+            parv << args
+
+            cmd = "receive_#{cmd.downcase}".to_sym
+
+            self.send(cmd, origin, parv) if self.respond_to?(cmd, true)
+        end
     end
 end

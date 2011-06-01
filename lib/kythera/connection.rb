@@ -29,6 +29,8 @@ class Connection < Cool.io::TCPSocket
         @connected = true
 
         log.info "successfully connected to #{@remote_host}:#{@remote_port}"
+
+        @uplink.connection_established
     end
 
     # Called when a connection fails
@@ -47,8 +49,17 @@ class Connection < Cool.io::TCPSocket
 
     # Called when data has been read and is waiting to be parsed
     def on_read(data)
-        log.debug "#{@remote_host}:#{@remote_port} -- #{data.chomp}"
+        data.scan /(.+\n?)/ do |line|
+            line = line[0]
 
-        @uplink.parse(data)
+            # If the last line had no \n, add this one onto it.
+            if @uplink.recvq[-1] and @uplink.recvq[-1][-1].chr != "\n"
+                @uplink.recvq[-1] += line
+            else
+                @uplink.recvq << line
+            end
+        end
+
+        @uplink.parse if @uplink.recvq[-1] and @uplink.recvq[-1][-1].chr == "\n"
     end
 end
