@@ -23,7 +23,6 @@ end
 # Require all of our files here and only here
 require 'kythera/connection'
 require 'kythera/loggable'
-require 'kythera/numeric'
 require 'kythera/protocol'
 require 'kythera/run'
 require 'kythera/server'
