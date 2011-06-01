@@ -271,14 +271,14 @@ module Kythera::Configuration::Uplink
 
         # Check to see if they specified a valid protocol
         unless File.exists? "lib/kythera/protocol/#{protocol.to_s.downcase}.rb"
-            raise "Invalid protocol specified for uplink"
+            raise "invalid protocol `#{protocol}` for uplink `#{name}`"
         end
 
         require "kythera/protocol/#{protocol.to_s.downcase}"
 
         proto = Protocol.find(protocol)
 
-        raise "Invalid protocol specified for uplink" unless proto
+        raise "invalid protocol `#{protocol}` for uplink `#{name}`" unless proto
     end
 
     def casemapping(mapping)

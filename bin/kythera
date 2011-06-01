@@ -99,7 +99,7 @@ configure do
         network :malkier
 
         # The protocol that your ircd speaks for server-to-server links.
-        # For ircd-ratbox this is `ts6`, other ircds may be supported
+        # For ircd-ratbox this is `ts6`, other IRCds may be supported
         # in the future.
         #
         protocol :ts6
