@@ -14,32 +14,31 @@ module Protocol::TS6
     # S E N D E R S #
     #################
 
-    PASS = 'PASS %s TS 6 :%s'
     # PASS <PASSWORD> TS <TS_CURRENT> :<SID>
     def send_pass
-        write PASS % [@config.send_password, @config.sid]
+        @sendq << "PASS #{@config.send_password} TS 6 :#{@config.sid}"
     end
 
     def send_capab
-        write 'CAPAB :QS KLN UNKLN ENCAP'
+        @sendq << 'CAPAB :QS KLN UNKLN ENCAP'
     end
 
-    SERVER = 'SERVER %s 1 :%s'
     # SERVER <NAME> <HOPS> :<DESC>
     def send_server
-        write SERVER % [Kythera.config.me.name, Kythera.config.me.description]
+        str  = 'SERVER '
+        str += "#{Kythera.config.me.name} 1 :#{Kythera.config.me.description}"
+
+        @sendq << str
     end
 
-    SVINFO = 'SVINFO 6 6 0 :%s'
     # SVINFO <MAX_TS_VERSION> <MIN_TS_VERSION> 0 :<TS>
     def send_svinfo
-        write SVINFO % Time.now.to_i
+        @sendq << "SVINFO 6 6 0 :#{Time.now.to_i}"
     end
 
-    PONG = ':%s PONG %s :%s'
     # :<SID> PONG <NAME> :<PARAM>
     def send_pong(param)
-        write PONG % [@config.sid, Kythera.config.me.name, param]
+        @sendq << ":#{@config.sid} PONG #{Kythera.config.me.name} :#{param}"
     end
 
     #####################

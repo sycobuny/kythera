@@ -9,7 +9,7 @@
 # Check for our dependencies before doing _anything_ else
 begin
     lib = nil
-    %w(rubygems cool.io sequel sqlite3).each do |m|
+    %w(rubygems sequel sqlite3).each do |m|
         lib = m
         require lib
     end
@@ -20,15 +20,18 @@ rescue LoadError
     abort
 end
 
+# Require all the Ruby stdlib stuff we need
+require 'logger'
+require 'optparse'
+require 'ostruct'
+require 'socket'
+
 # Require all of our files here and only here
-require 'kythera/connection'
 require 'kythera/loggable'
 require 'kythera/protocol'
 require 'kythera/run'
 require 'kythera/server'
 require 'kythera/uplink'
-
-require 'ostruct'
 
 # Starts the parsing of the configuraiton DSL
 #

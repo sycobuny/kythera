@@ -6,6 +6,8 @@
 # Rights to this code are documented in LICENSE
 #
 
+require 'kythera'
+
 # Represents the interface to the remote IRC server
 class Uplink
     include Loggable
@@ -13,16 +15,15 @@ class Uplink
     # The configuration information
     attr_accessor :config
 
-    # The cool.io socket
-    attr_accessor :connection
-
-    # The receive-queue, which holds lines waiting to be parsed
-    attr_accessor :recvq
+    # The TCPSocket
+    attr_accessor :socket
 
     # Creates a new Uplink and includes the protocol-specific methods
     def initialize(config)
-        @config = config
-        @recvq  = []
+        @config    = config
+        @connected = false
+        @recvq     = []
+        @sendq     = []
 
         # Include the methods for the protocol we're using
         extend Protocol
@@ -60,28 +61,99 @@ class Uplink
     # @return [Boolean] true or false
     #
     def connected?
-        @connection ? @connection.connected? : false
+        @connected
     end
 
-    # Called by Connection when we're connected
-    def connection_established
-        send_pass
-        send_capab
-        send_server
-        send_svinfo
+    def need_write?
+        not @sendq.empty?
     end
 
-    def write(data)
-        log.debug "<- #{data}"
-        data += "\r\n"
-        @connection.write data
+    def dead=(bool)
+        if bool
+            log.info "lost connection to #{@config.name}:#{@config.port}"
+
+            @socket    = nil
+            @connected = false
+        end
     end
 
+    def connect
+        log.info "connecting to #{@config.name}:#{@config.port}"
+
+        begin
+            @socket = TCPSocket.new(@config.name, @config.port,
+                                    @config.bind_host, @config.bind_port)
+        rescue Exception => err
+            log.error "connection failed: #{err}"
+            self.dead = true
+            return
+        else
+            log.info "successfully connected to #{@config.name}:#{@config.port}"
+
+            @connected = true
+
+            send_pass
+            send_capab
+            send_server
+            send_svinfo
+        end
+    end
+
+    def read
+        begin
+            data = @socket.read_nonblock(8192)
+        rescue Errno::EAGAIN
+            retry # XXX - maybe add this back to the readfds?
+        rescue Exception => err
+            data = nil # Dead
+        end
+
+        if not data or data.empty?
+            log.error "read error from #{@config.name}: #{err}" if err
+            self.dead = true
+            return
+        end
+
+        # Passes every "line" to the block, including "\n"
+        data.scan /(.+\n?)/ do |line|
+            line = line[0]
+
+            # If the last line had no \n, add this one onto it.
+            if @recvq[-1] and @recvq[-1][-1].chr != "\n"
+                @recvq[-1] += line
+            else
+                @recvq << line
+            end
+        end
+
+        parse if @recvq[-1] and @recvq[-1][-1].chr == "\n"
+    end
+
+    def write
+        begin
+            # Use shift because we need it to fall off immediately
+            while line = @sendq.shift
+                log.debug "<- #{line}"
+                line += "\r\n"
+                @socket.write_nonblock(line)
+            end
+        rescue Errno::EAGAIN
+            retry # XXX - maybe add this back to the writefds?
+        rescue Exception => err
+            log.error "write error to #{@config.name}: #{err}"
+            self.dead = true
+            return
+        end
+    end
+
+    private
+
+    # This is predefined as an optimization
     NO_COL = 1 .. -1
 
     # Parses incoming IRC data and sends it off to protocol-specific handlers
     def parse
-        while line = recvq.shift
+        while line = @recvq.shift
             line.chomp!
 
             log.debug "-> #{line}"

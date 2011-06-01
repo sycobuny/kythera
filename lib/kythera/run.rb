@@ -8,9 +8,6 @@
 
 require 'kythera'
 
-require 'logger'
-require 'optparse'
-
 class Kythera
     include Loggable
 
@@ -106,65 +103,40 @@ class Kythera
     # This makes sure we're connected and handles events, timers, and I/O
     #
     def main_loop
-        @io_loop = Cool.io::Loop.default
-
         loop do
-            # XXX - dead connections?
-            # XXX - EventQueue, etc?
-
             # If it's true we're connectED, if it's nil we're connectING
-            connect if connected? == false
+            connect until @uplink and @uplink.connected?
 
-            # Do I/O... most of the code runs from here
-            @io_loop.run_once
-        end
-    end
+            writefd = [@uplink.socket] if @uplink.need_write?
 
-    # Are we connected to the uplink?
-    #
-    # @return [Boolean] true for yes, false for no, nil for trying to
-    #
-    def connected?
-        if @uplink
-            @uplink.connection.connected?
-        else
-            false
+            ret = IO.select([@uplink.socket], writefd, [], 60)
+
+            next unless ret
+
+            @uplink.read  unless ret[0].empty?
+            @uplink.write unless ret[1].empty?
         end
     end
 
     # Connects to the uplink
-    # XXX - local binding is not implemented in cool.io!
-    #
-    # @return [Connection] the current cool.io socket
-    #
     def connect
         if @uplink
             log.debug "current uplink failed, trying next"
-
-            @uplink.connection.uplink = nil # Ugh... cool.io sucks
 
             curruli  = @@config.uplinks.find_index(@uplink.config)
             curruli += 1
             curruli  = 0 if curruli > (@@config.uplinks.length - 1)
 
-            @uplink.config = @@config.uplinks[curruli]
+            @uplink = Uplink.new @@config.uplinks[curruli]
 
             sleep @@config.me.reconnect_time
         else
-            @uplink           = Uplink.new @@config.uplinks[0]
-            @uplink.logger    = @logger if @logger
-            @uplink.log_level = @@config.me.logging
+            @uplink = Uplink.new @@config.uplinks[0]
         end
 
-        log.info "connecting to #{@uplink}"
+        @uplink.logger = @logger if @logger
 
-        conn           = Connection.connect(@uplink.name, @uplink.port)
-        conn.logger    = @logger if @logger
-        conn.log_level = @@config.me.logging
-        conn.uplink    = @uplink
-        conn.attach      @io_loop
-
-        @uplink.connection = conn
+        @uplink.connect
     end
 
     # Checks to see if we're running as root

@@ -54,13 +54,12 @@ This application has the following requirements:
 This application requires the following RubyGems:
 
   * rake ~> 0.8
-  * cool.io ~> 1.0 (requires iobuffer ~> 1.0)
   * sequel ~> 3.23
   * sqlite3 ~> 1.3
 
-Rake is required for testing and other automated tasks. Cool.io is required
-for high-performance socket I/O. Sequel and sqlite3 are required for database
-management. These gems are widely available and should not be a problem.
+Rake is required for testing and other automated tasks. Sequel and sqlite3 are
+required for database management. These gems are widely available and should
+not be a problem.
 
 If you want to run the unit tests you'll also need `riot ~> 0.12` and run
 `rake test` from your terminal.
