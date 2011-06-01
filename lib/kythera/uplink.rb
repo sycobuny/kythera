@@ -22,7 +22,7 @@ class Uplink
         @connection = nil
 
         # Include the methods for the protocol we're using
-        extend Protocol.const_get(@config.protocol)
+        extend Protocol.find(@config.protocol)
     end
 
     public

@@ -7,4 +7,8 @@
 #
 
 module Protocol
+    # Allows protocol module names to be case-insensitive
+    def self.find(mod)
+        Protocol.const_get Protocol.constants.find { |c| c =~ /^#{mod}$/i }
+    end
 end

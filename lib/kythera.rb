@@ -276,7 +276,7 @@ module Kythera::Configuration::Uplink
 
         require "kythera/protocol/#{protocol.to_s.downcase}"
 
-        proto = Protocol.const_get(protocol) rescue nil
+        proto = Protocol.find(protocol)
 
         raise "Invalid protocol specified for uplink" unless proto
     end
