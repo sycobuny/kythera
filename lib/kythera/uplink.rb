@@ -25,6 +25,11 @@ class Uplink
         @recvq     = []
         @sendq     = []
 
+        $eventq.handle(:socket_readable) { read  }
+        $eventq.handle(:socket_writable) { write }
+        $eventq.handle(:connected)       { send_handshake }
+        $eventq.handle(:recvq_ready)     { parse }
+
         # Include the methods for the protocol we're using
         extend Protocol
         extend Protocol.find(@config.protocol)
@@ -64,19 +69,30 @@ class Uplink
         @connected
     end
 
+    # Returns whether the sendq needs written
+    #
+    # @return [Boolean] true or false
+    #
     def need_write?
         not @sendq.empty?
     end
 
+    # Sets our state to not connected
+    #
+    # @param [Boolean] bool true or false
+    #
     def dead=(bool)
         if bool
             log.info "lost connection to #{@config.name}:#{@config.port}"
+
+            $eventq.post :disconnected
 
             @socket    = nil
             @connected = false
         end
     end
 
+    # Connects to the uplink using the information in `@config`
     def connect
         log.info "connecting to #{@config.name}:#{@config.port}"
 
@@ -92,13 +108,11 @@ class Uplink
 
             @connected = true
 
-            send_pass
-            send_capab
-            send_server
-            send_svinfo
+            $eventq.post :connected
         end
     end
 
+    # Reads waiting data from the socket and stores each "line" in the recvq
     def read
         begin
             data = @socket.read_nonblock(8192)
@@ -126,9 +140,10 @@ class Uplink
             end
         end
 
-        parse if @recvq[-1] and @recvq[-1][-1].chr == "\n"
+        $eventq.post :recvq_ready if @recvq[-1] and @recvq[-1][-1].chr == "\n"
     end
 
+    # Writes the each "line" in the sendq to the socket
     def write
         begin
             # Use shift because we need it to fall off immediately
@@ -171,9 +186,14 @@ class Uplink
             cmd  = parv.delete_at(0)
             parv << args
 
-            cmd = "receive_#{cmd.downcase}".to_sym
+            event = "irc_#{cmd.downcase}".to_sym
+            cmd   = "receive_#{cmd.downcase}".to_sym
 
+            # Call the protocol-specific handler
             self.send(cmd, origin, parv) if self.respond_to?(cmd, true)
+
+            # Fire off an event for extensions, etc
+            $eventq.post(event, origin, parv)
         end
     end
 end

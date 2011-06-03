@@ -13,8 +13,6 @@ class Kythera
 
     # Gets the ball rolling...
     def initialize
-        @@app = self
-
         puts "#{ME}: version #{VERSION} [#{RUBY_PLATFORM}]"
 
         # Run through some startup tests
@@ -57,7 +55,7 @@ class Kythera
         # Debugging stuff
         if debug
             $-w = true
-            @@config.me.logging = :debug
+            $config.me.logging = :debug
 
             puts "#{ME}: warning: debug mode enabled"
             puts "#{ME}: warning: all activity will be logged in the clear"
@@ -82,7 +80,10 @@ class Kythera
             self.logger = Logger.new($stdout) if logging or debug
         end
 
-        self.log_level = @@config.me.logging if logging or debug
+        self.log_level = $config.me.logging if logging or debug
+
+        # Give the eventq logging for debugging
+        $eventq.logger = @logger
 
         # Write a pid file
         Dir.mkdir 'var' unless File.exists? 'var'
@@ -107,14 +108,20 @@ class Kythera
             # If it's true we're connectED, if it's nil we're connectING
             connect until @uplink and @uplink.connected?
 
+            # Run the event loop until it's empty
+            $eventq.run while $eventq.needs_ran?
+
+            # Only check for writable if we have data waiting to be written
             writefd = [@uplink.socket] if @uplink.need_write?
 
+            # Wait up to 60 seconds for our socket to become readable/writable
             ret = IO.select([@uplink.socket], writefd, [], 60)
 
+            # This means select timed out and there's no activity on the socket
             next unless ret
 
-            @uplink.read  unless ret[0].empty?
-            @uplink.write unless ret[1].empty?
+            $eventq.post :socket_readable unless ret[0].empty?
+            $eventq.post :socket_writable unless ret[1].empty?
         end
     end
 
@@ -123,15 +130,15 @@ class Kythera
         if @uplink
             log.debug "current uplink failed, trying next"
 
-            curruli  = @@config.uplinks.find_index(@uplink.config)
+            curruli  = $config.uplinks.find_index(@uplink.config)
             curruli += 1
-            curruli  = 0 if curruli > (@@config.uplinks.length - 1)
+            curruli  = 0 if curruli > ($config.uplinks.length - 1)
 
-            @uplink = Uplink.new @@config.uplinks[curruli]
+            @uplink = Uplink.new $config.uplinks[curruli]
 
-            sleep @@config.me.reconnect_time
+            sleep $config.me.reconnect_time
         else
-            @uplink = Uplink.new @@config.uplinks[0]
+            @uplink = Uplink.new $config.uplinks[0]
         end
 
         @uplink.logger = @logger if @logger

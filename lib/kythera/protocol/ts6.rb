@@ -14,21 +14,27 @@ module Protocol::TS6
     # S E N D E R S #
     #################
 
+    # Sends the initial data to the server
+    def send_handshake
+        send_pass
+        send_capab
+        send_server
+        send_svinfo
+    end
+
     # PASS <PASSWORD> TS <TS_CURRENT> :<SID>
     def send_pass
         @sendq << "PASS #{@config.send_password} TS 6 :#{@config.sid}"
     end
 
+    # CAPAB :<CAPABS>
     def send_capab
         @sendq << 'CAPAB :QS KLN UNKLN ENCAP'
     end
 
     # SERVER <NAME> <HOPS> :<DESC>
     def send_server
-        str  = 'SERVER '
-        str += "#{Kythera.config.me.name} 1 :#{Kythera.config.me.description}"
-
-        @sendq << str
+        @sendq << "SERVER #{$config.me.name} 1 :#{$config.me.description}"
     end
 
     # SVINFO <MAX_TS_VERSION> <MIN_TS_VERSION> 0 :<TS>
@@ -38,7 +44,7 @@ module Protocol::TS6
 
     # :<SID> PONG <NAME> :<PARAM>
     def send_pong(param)
-        @sendq << ":#{@config.sid} PONG #{Kythera.config.me.name} :#{param}"
+        @sendq << ":#{@config.sid} PONG #{$config.me.name} :#{param}"
     end
 
     #####################
@@ -58,7 +64,8 @@ module Protocol::TS6
             @recvq.clear
             @connection.close
         else
-            Server.new(parv[3], '<unknown>', @logger)
+            # XXX - implement classes next
+            #Server.new(parv[3], '<unknown>', @logger)
         end
     end
 

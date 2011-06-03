@@ -28,30 +28,32 @@ require 'socket'
 
 # Require all of our files here and only here
 require 'kythera/loggable'
+require 'kythera/event'
 require 'kythera/protocol'
 require 'kythera/run'
-require 'kythera/server'
 require 'kythera/uplink'
+
+# I know globals are evil etc. but this is just plain easier
+$config = Object.new
+$eventq = EventQueue.new
+
+class << $config
+    # Adds methods to the parser from an arbitrary module
+    #
+    # @param [Module] mod the module containing methods to add
+    #
+    def use(mod)
+        $config.extend mod
+    end
+end
 
 # Starts the parsing of the configuraiton DSL
 #
 # @param [Proc] block contains the actual configuration code
 #
 def configure(&block)
-    Kythera.config = Object.new
-
-    class << Kythera.config
-        # Adds methods to the parser from an arbitrary module
-        #
-        # @param [Module] mod the module containing methods to add
-        #
-        def use(mod)
-            Kythera.config.extend mod
-        end
-    end
-
     # The configuration magic begins here...
-    Kythera.config.instance_eval &block
+    $config.instance_eval &block
 
     # Make sure the configuration information is valid
     Kythera.verify_configuration
@@ -77,38 +79,10 @@ class Kythera
     # Our name for things we print out
     ME = 'kythera'
 
-    # Application-wide configuraiton settings
-    @@config = nil
-
-    # Configuration reader
-    #
-    # @return [Object] the configuration settings
-    #
-    def self.config
-        @@config
-    end
-
-    # Configuration writer
-    #
-    # @param [Object] config a plain Object for the configuration
-    # @return [Object] the new configuration settings
-    #
-    def self.config=(config)
-        @@config = config
-    end
-
-    # The currently running instance of self (this may disappear)
-    #
-    # @return [Kythera] self
-    #
-    def self.app
-        @@app
-    end
-
     # Verifies that the configuration isn't invalid or incomplete
     def self.verify_configuration
         # XXX - configuration verification
-        @@config.uplinks.sort! { |a, b| a.priority <=> b.priority }
+        $config.uplinks.sort! { |a, b| a.priority <=> b.priority }
     end
 end
 
