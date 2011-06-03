@@ -6,6 +6,10 @@
 # Rights to this code are documented in LICENSE
 #
 
+require 'kythera'
+
+require 'kythera/protocol/ts6/server'
+
 # Implements TS6 protocol-specific methods
 module Protocol::TS6
     private
@@ -64,8 +68,7 @@ module Protocol::TS6
             @recvq.clear
             @connection.close
         else
-            # XXX - implement classes next
-            #Server.new(parv[3], '<unknown>', @logger)
+            Server.new(parv[3], @logger)
         end
     end
 

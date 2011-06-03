@@ -31,6 +31,7 @@ require 'kythera/loggable'
 require 'kythera/event'
 require 'kythera/protocol'
 require 'kythera/run'
+require 'kythera/server'
 require 'kythera/uplink'
 
 # I know globals are evil etc. but this is just plain easier
