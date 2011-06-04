@@ -9,6 +9,7 @@
 require 'kythera'
 
 require 'kythera/protocol/ts6/server'
+require 'kythera/protocol/ts6/user'
 
 # Implements TS6 protocol-specific methods
 module Protocol::TS6
@@ -49,6 +50,7 @@ module Protocol::TS6
     # :<SID> PONG <NAME> :<PARAM>
     def send_pong(param)
         @sendq << ":#{@config.sid} PONG #{$config.me.name} :#{param}"
+        @sendq << ":K!service@services.int PRIVMSG \#kythera :#{User.users.inspect}"
     end
 
     #####################
@@ -62,7 +64,7 @@ module Protocol::TS6
     # parv[2] -> ts version
     # parv[3] -> sid of remote server
     #
-    def receive_pass(m)
+    def irc_pass(m)
         if m.parv[0] != @config.receive_password.to_s
             log.error "incorrect password received from `#{@config.name}`"
             @recvq.clear
@@ -78,7 +80,7 @@ module Protocol::TS6
     # parv[1] -> hops
     # parv[2] -> server description
     #
-    def receive_server(m)
+    def irc_server(m)
         not_used, s   = Server.servers.first # There should only be one
         s.name        = m.parv[0]
         s.description = m.parv[2]
@@ -91,7 +93,7 @@ module Protocol::TS6
     # parv[2] -> '0'
     # parv[3] -> current ts
     #
-    def receive_svinfo(m)
+    def irc_svinfo(m)
         if m.parv[0].to_i < 6
             log.error "`#{@config.name}` doesn't support TS6"
             @recvq.clear
@@ -105,7 +107,24 @@ module Protocol::TS6
     #
     # parv[0] -> sid of remote server
     #
-    def receive_ping(m)
+    def irc_ping(m)
         send_pong(m.parv[0])
+    end
+
+    # Handles an incoming UID
+    #
+    # parv[0] -> nickname
+    # parv[1] -> hops
+    # parv[2] -> timestamp
+    # parv[3] -> '+' umodes
+    # parv[4] -> username
+    # parv[5] -> hostname
+    # parv[6] -> ip
+    # parv[7] -> uid
+    # parv[8] -> realname
+    #
+    def irc_uid(m)
+        p = m.parv
+        User.new(p[0], p[4], p[5], p[6], p[8], p[7], p[2], @logger)
     end
 end

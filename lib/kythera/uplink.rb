@@ -188,14 +188,13 @@ class Uplink
 
             m = Message.new(origin, parv, raw)
 
-            event = "irc_#{cmd.downcase}".to_sym
-            cmd   = "receive_#{cmd.downcase}".to_sym
+            cmd = "irc_#{cmd.downcase}".to_sym
 
             # Call the protocol-specific handler
             self.send(cmd, m) if self.respond_to?(cmd, true)
 
             # Fire off an event for extensions, etc
-            $eventq.post(event, m)
+            $eventq.post(cmd, m)
         end
     end
 end
