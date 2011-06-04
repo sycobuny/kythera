@@ -50,7 +50,6 @@ module Protocol::TS6
     # :<SID> PONG <NAME> :<PARAM>
     def send_pong(param)
         @sendq << ":#{@config.sid} PONG #{$config.me.name} :#{param}"
-        @sendq << ":K!service@services.int PRIVMSG \#kythera :#{User.users.inspect}"
     end
 
     #####################
