@@ -8,6 +8,7 @@
 
 require 'kythera'
 
+# Represents the old `(char *origin, int parc, char *parv[])`
 class Message
     # A Regex to break up the origin
     ORIGIN_RE = /^(.+)\!(.+)\@(.+)$/
@@ -16,9 +17,6 @@ class Message
     attr_reader :parv, :raw
 
     # Creates a new Message
-    # We use these to represent the old C style:
-    # `(char *origin, char *target, char *parv[])`
-    #
     def initialize(origin, parv, raw)
         @origin, @parv, @raw = origin, parv, raw
 

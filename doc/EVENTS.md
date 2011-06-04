@@ -12,6 +12,6 @@ List of Events
   * disconnected -- we have been disconnected from the uplink
   * recvq_ready -- the recvq has data ready to be parsed
   
-  * irc_* -- any command received by the uplink is posted as irc_<command>
+  * irc\_* -- any command received by the uplink is posted as irc\_[command]
       * e.g.: PRIVMSG = irc_privmsg
       * e.g.: PING = irc_ping
