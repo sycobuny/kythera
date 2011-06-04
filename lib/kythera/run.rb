@@ -109,7 +109,7 @@ class Kythera
             connect until @uplink and @uplink.connected?
 
             # Run the event loop until it's empty
-            $eventq.run while $eventq.needs_ran?
+            $eventq.run while $eventq.needs_run?
 
             # Only check for writable if we have data waiting to be written
             writefd = [@uplink.socket] if @uplink.need_write?

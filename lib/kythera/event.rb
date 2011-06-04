@@ -69,7 +69,7 @@ class EventQueue
     #
     # @return [Boolean] true or false
     #
-    def needs_ran?
+    def needs_run?
         @queue.empty? ? false : true
     end
 

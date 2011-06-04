@@ -169,7 +169,7 @@ class Uplink
     # Parses incoming IRC data and sends it off to protocol-specific handlers
     def parse
         while line = @recvq.shift
-            line.chomp!
+            raw = line.chomp!
 
             log.debug "-> #{line}"
 
@@ -186,14 +186,16 @@ class Uplink
             cmd  = parv.delete_at(0)
             parv << args
 
+            m = Message.new(origin, parv, raw)
+
             event = "irc_#{cmd.downcase}".to_sym
             cmd   = "receive_#{cmd.downcase}".to_sym
 
             # Call the protocol-specific handler
-            self.send(cmd, origin, parv) if self.respond_to?(cmd, true)
+            self.send(cmd, m) if self.respond_to?(cmd, true)
 
             # Fire off an event for extensions, etc
-            $eventq.post(event, origin, parv)
+            $eventq.post(event, m)
         end
     end
 end

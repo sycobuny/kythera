@@ -62,13 +62,13 @@ module Protocol::TS6
     # parv[2] -> ts version
     # parv[3] -> sid of remote server
     #
-    def receive_pass(origin, parv)
-        if parv[0] != @config.receive_password.to_s
+    def receive_pass(m)
+        if m.parv[0] != @config.receive_password.to_s
             log.error "incorrect password received from `#{@config.name}`"
             @recvq.clear
             @connection.close
         else
-            Server.new(parv[3], @logger)
+            Server.new(m.parv[3], @logger)
         end
     end
 
@@ -78,10 +78,10 @@ module Protocol::TS6
     # parv[1] -> hops
     # parv[2] -> server description
     #
-    def receive_server(origin, parv)
+    def receive_server(m)
         not_used, s   = Server.servers.first # There should only be one
-        s.name        = parv[0]
-        s.description = parv[2]
+        s.name        = m.parv[0]
+        s.description = m.parv[2]
     end
 
     # Handles an incoming SVINFO
@@ -91,12 +91,12 @@ module Protocol::TS6
     # parv[2] -> '0'
     # parv[3] -> current ts
     #
-    def receive_svinfo(origin, parv)
-        if parv[0].to_i < 6
+    def receive_svinfo(m)
+        if m.parv[0].to_i < 6
             log.error "`#{@config.name}` doesn't support TS6"
             @recvq.clear
             @connection.close
-        elsif (parv[3].to_i - Time.now.to_i) >= 60
+        elsif (m.parv[3].to_i - Time.now.to_i) >= 60
             log.warning "`#{@config.name}` has excessive TS delta"
         end
     end
@@ -105,7 +105,7 @@ module Protocol::TS6
     #
     # parv[0] -> sid of remote server
     #
-    def receive_ping(origin, parv)
-        send_pong(parv[0])
+    def receive_ping(m)
+        send_pong(m.parv[0])
     end
 end
