@@ -10,7 +10,7 @@ require 'rubygems'
 require 'benchmark'
 require 'benchmark/ips'
 
-IRC_RE = /^\:(\S+)\s(\S+)\s([^:]+)(?:\s\:?(.+))?$/
+IRC_RE = /^(?:\:(\S+)\s)?(\S+)\s(?:([^:]+)\s)?(?:\:(.+))?$/
 NO_COL = 1 .. -1
 
 def parse_re(recvq)
@@ -21,8 +21,14 @@ def parse_re(recvq)
 
         origin = m[1]
         cmd    = m[2]
-        parv   = m[3].split(' ')
-        parv  << m[4]
+
+        if m[3]
+            parv = m[3].split
+        else
+            parv = []
+        end
+
+        parv << m[4]
     end
 end
 
