@@ -10,7 +10,7 @@ require 'rubygems'
 require 'benchmark'
 require 'benchmark/ips'
 
-IRC_RE = /^\:(\S+)\s([^:]+)(?:\s\:?(.+))?$/
+IRC_RE = /^\:(\S+)\s(\S+)\s([^:]+)(?:\s\:?(.+))?$/
 NO_COL = 1 .. -1
 
 def parse_re(recvq)
@@ -20,8 +20,9 @@ def parse_re(recvq)
         next unless m = IRC_RE.match(line)
 
         origin = m[1]
-        parv   = m[2].split(' ')
-        parv  << m[3]
+        cmd    = m[2]
+        parv   = m[3].split(' ')
+        parv  << m[4]
     end
 end
 
@@ -34,11 +35,12 @@ def parse_line(recvq)
             origin, line = line.split(' ', 2)
             origin = origin[NO_COL]
         else
-            next # We don't care about the line if it has no origin
+            origin = nil
         end
 
         tokens, args = line.split(' :')
         parv = tokens.split(' ')
+        cmd  = parv.delete_at(0)
         parv << args
     end
 end
