@@ -8,6 +8,7 @@
 
 require 'kythera'
 
+require 'kythera/protocol/ts6/channel'
 require 'kythera/protocol/ts6/server'
 require 'kythera/protocol/ts6/user'
 
@@ -125,5 +126,76 @@ module Protocol::TS6
     def irc_uid(m)
         p = m.parv
         User.new(p[0], p[4], p[5], p[6], p[8], p[7], p[2], @logger)
+    end
+
+    # Removes the first character of the string
+    REMOVE_FIRST = 1 .. -1
+
+    # Special constant for grabbing mode params
+    GET_MODES_PARAMS = 2 ... -1
+
+    # Handles an incoming
+    #
+    # parv[0] -> timestamp
+    # parv[1] -> channel name
+    # parv[2] -> '+' cmodes
+    # parv... -> cmode params (if any)
+    # parv[-1] -> members as UIDs
+    #
+    def irc_sjoin(m)
+        their_ts = m.parv[0].to_i
+
+        # Do we already have this channel?
+        if c = Channel.channels[m.parv[1]]
+            if their_ts < c.timestamp
+                # Remove our status modes, channel modes, and bans
+                c.members.each { |u| u.clear_status_modes(c) }
+                c.clear_modes
+                c.timestamp = their_ts
+            end
+        else
+            c = Channel.new(m.parv[1], m.parv[0], @logger)
+        end
+
+        # Parse channel modes
+        if their_ts <= c.timestamp
+            modes_and_params = m.parv[GET_MODES_PARAMS]
+            modes  = modes_and_params[0]
+            params = modes_and_params[REMOVE_FIRST]
+
+            c.parse_modes(modes, params)
+        end
+
+        # Parse the members list
+        members = m.parv[-1].split(' ')
+
+        # This particular process was benchmarked, and this is the fastest
+        # See benchmark/theory/multiprefix_parsing.rb
+        #
+        members.each do |uid|
+            op = voice = false
+
+            if uid[0].chr == '@'
+                op  = true
+                uid = uid[REMOVE_FIRST]
+            end
+
+            if uid[0].chr == '+'
+                voice = true
+                uid   = uid[REMOVE_FIRST]
+            end
+
+            unless u = User.users[uid]
+                log.error "Got non-existant UID #{uid} in SJOIN to #{c.name}"
+                next
+            end
+
+            c.add_user u
+
+            if their_ts <= c.timestamp
+                u.add_status_mode(c, :operator) if op
+                u.add_status_mode(c, :voice)    if voice
+            end
+        end
     end
 end

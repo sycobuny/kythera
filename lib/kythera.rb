@@ -28,6 +28,7 @@ require 'socket'
 
 # Require all of our files here and only here
 require 'kythera/loggable'
+require 'kythera/channel'
 require 'kythera/event'
 require 'kythera/message'
 require 'kythera/protocol'

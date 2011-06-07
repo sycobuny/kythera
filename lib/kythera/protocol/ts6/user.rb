@@ -23,6 +23,7 @@ class User
         @uid       = uid
         @timestamp = ts
         @logger    = logger
+        @cmodes    = {}
 
         @@users[uid] = self
 
