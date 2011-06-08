@@ -96,3 +96,5 @@ the same manner.
 
 If you've read this far, congratulations. You are among the few elite people
 that actually read documentation. Thank you.
+
+[issue]: https://github.com/rakaur/kythera/issues
