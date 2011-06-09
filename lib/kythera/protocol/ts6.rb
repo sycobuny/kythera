@@ -132,7 +132,20 @@ module Protocol::TS6
         send_pong(m.parv[0])
     end
 
-    # Handles an incoming UID
+    # Handles an incoming SID (server introduction)
+    #
+    # parv[0] -> server name
+    # parv[1] -> hops
+    # parv[2] -> sid
+    # parv[3] -> description
+    #
+    def irc_sid(m)
+        s             = Server.new(m.parv[2], @logger)
+        s.name        = m.parv[0]
+        s.description = m.parv[3]
+    end
+
+    # Handles an incoming UID (user introduction)
     #
     # parv[0] -> nickname
     # parv[1] -> hops
