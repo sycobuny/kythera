@@ -169,6 +169,7 @@ class Uplink
 
     # This is predefined as an optimization
     NO_COL = 1 .. -1
+    RE_SPACE = / /
 
     # Parses incoming IRC data and sends it off to protocol-specific handlers
     def parse
@@ -179,14 +180,14 @@ class Uplink
 
             if line[0].chr == ':'
                 # Remove the origin from the line, and eat the colon
-                origin, line = line.split(' ', 2)
+                origin, line = line.split(RE_SPACE, 2)
                 origin = origin[NO_COL]
             else
                 origin = nil
             end
 
             tokens, args = line.split(' :')
-            parv = tokens.split(' ')
+            parv = tokens.split(RE_SPACE)
             cmd  = parv.delete_at(0)
             parv << args
 

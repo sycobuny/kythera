@@ -30,7 +30,7 @@ class Channel
 
         @@channels[name] = self
 
-        log.debug "new channel: #{name} (#{timestamp})"
+        log.debug "new channel: #{@name} (#{timestamp})"
 
         $eventq.post(:channel_added, self)
     end

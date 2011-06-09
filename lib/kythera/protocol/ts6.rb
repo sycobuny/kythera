@@ -202,7 +202,7 @@ module Protocol::TS6
 
         # Do we already have this channel?
         if channel = Channel.channels[m.parv[1]]
-            if their_ts < c.timestamp
+            if their_ts < channel.timestamp
                 # Remove our status modes, channel modes, and bans
                 channel.members.each { |u| u.clear_status_modes(channel) }
                 channel.clear_modes
@@ -291,7 +291,6 @@ module Protocol::TS6
     #
     def irc_part(m)
         user, channel = find_uid_and_channel(m.origin, m.parv[0], 'PART')
-        p m.parv
 
         return unless user and channel
 

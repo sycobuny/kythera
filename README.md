@@ -77,6 +77,7 @@ Thanks to testers, contributors, etc:
   * sycobuny, Stephen Belcher <sycobuny@malkier.net>
   * rintaun, Matt Lanigan <rintaun@projectxero.net>
   * xiphias, Michael Rodriguez <xiphias@khaydarin.net>
+  * andrew, Andrew Herbig <goforit7arh@gmail.com>
 
 ## Contact and Support ##
 

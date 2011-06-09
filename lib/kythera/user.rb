@@ -49,7 +49,7 @@ class User
     def add_status_mode(channel, mode)
         (@cmodes[channel] ||= []) << mode
 
-        log.debug "status mode added: #{@nickname} -> #{mode} #{channel.name}"
+        log.debug "status mode added: #{@nickname}/#{channel} -> #{mode}"
     end
 
     # Deletes a status mode for this user on a particular channel
@@ -60,14 +60,14 @@ class User
     def delete_status_mode(channel, mode)
         unless @cmodes[channel]
             log.warning "cannot remove mode from a channel with no known modes"
-            log.warning "#{channel.name} -> #{mode}"
+            log.warning "#{channel} -> #{mode}"
 
             return
         end
 
         @cmodes[channel].delete mode
 
-        log.debug "status mode deleted: #{@nickname} -> #{mode} #{channel.name}"
+        log.debug "status mode deleted: #{@nickname}/#{channel} -> #{mode}"
     end
 
     # Deletes all status modes for given channel
@@ -77,7 +77,7 @@ class User
     def clear_status_modes(channel)
         unless @cmodes[channel]
             log.warning "cannot clear modes from a channel with no known modes"
-            log.warning "#{channel.name} -> clear all modes"
+            log.warning "#{channel} -> clear all modes"
 
             return
         end

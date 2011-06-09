@@ -55,7 +55,7 @@ class EventQueue
     #
     def post(event, *args)
         @queue << Event.new(event, *args)
-        log.debug "posted new event: #{event}"
+        #log.debug "posted new event: #{event}"
     end
 
     # Registers a handler for an event
