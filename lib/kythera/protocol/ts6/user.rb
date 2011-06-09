@@ -28,5 +28,7 @@ class User
         @@users[uid] = self
 
         log.debug "new user: #{nick}!#{user}@#{host} (#{real}) [#{uid}]"
+
+        $eventq.post(:user_added, self)
     end
 end

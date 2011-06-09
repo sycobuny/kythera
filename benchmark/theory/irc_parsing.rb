@@ -10,8 +10,9 @@ require 'rubygems'
 require 'benchmark'
 require 'benchmark/ips'
 
-IRC_RE = /^(?:\:(\S+)\s)?(\S+)\s(?:([^:]+)\s)?(?:\:(.+))?$/
-NO_COL = 1 .. -1
+IRC_RE   = /^(?:\:(\S+) +)?(?:([^:\s].+?))(?: +([^:].+?))?(?: +\:(.+))?$/
+RE_SPACE = / /
+NO_COL   = 1 .. -1
 
 def parse_re(recvq)
     while line = recvq.shift
@@ -23,7 +24,7 @@ def parse_re(recvq)
         cmd    = m[2]
 
         if m[3]
-            parv = m[3].split
+            parv = m[3].split(RE_SPACE)
         else
             parv = []
         end
@@ -53,10 +54,10 @@ end
 
 Benchmark.ips do |x|
     x.report 'regular expression' do
-        parse_re [':rakaur!rakaur@malkier.net PRIVMSG #rintaun :omg hai']
+        parse_re [':rakaur!rakaur@malkier.net  PRIVMSG  #rintaun  :omg hai\r\n']
     end
 
     x.report 'line parser' do
-        parse_line [':rakaur!rakaur@malkier.net PRIVMSG #rintaun :omg hai']
+        parse_line [':rakaur!rakaur@malkier.net  PRIVMSG  #rintaun  :omg hai\r\n']
     end
 end

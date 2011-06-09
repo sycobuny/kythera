@@ -16,6 +16,23 @@ require 'kythera/protocol/ts6/user'
 module Protocol::TS6
     private
 
+    ###########
+    # M I S C #
+    ###########
+
+    # Finds a User and Channel or errors
+    def find_uid_and_channel(uid, name, command)
+        unless user = User.users[uid]
+            log.error "got non-existant UID in #{command}: #{uid}"
+        end
+
+        unless channel = Channel.channels[name]
+            log.error "got non-existant channel in #{command}: #{name}"
+        end
+
+        [user, channel]
+    end
+
     #################
     # S E N D E R S #
     #################
@@ -86,10 +103,10 @@ module Protocol::TS6
             # we specifically state we only speak TS6, but it doesn't seem like
             # they care, so now we have to deal with this anyway.
             #
-            s = Server.new('ts5_' + rand(99999).to_s, @logger)
+            server = Server.new('ts5_' + rand(99999).to_s, @logger)
         else
             # No origin means we're handshaking, so this must be our uplink
-            not_used, s = Server.servers.first
+            not_used, server = Server.servers.first
 
             unless m.parv[0] == @config.name
                 log.error "name mismatch from uplink"
@@ -101,10 +118,12 @@ module Protocol::TS6
             end
         end
 
-        s.name        = m.parv[0]
-        s.description = m.parv[2]
+        server.name        = m.parv[0]
+        server.description = m.parv[2]
 
         log.debug "new server: #{m.parv[0]}"
+
+        $eventq.post(:server_added, server)
     end
 
     # Handles an incoming SVINFO
@@ -140,9 +159,11 @@ module Protocol::TS6
     # parv[3] -> description
     #
     def irc_sid(m)
-        s             = Server.new(m.parv[2], @logger)
-        s.name        = m.parv[0]
-        s.description = m.parv[3]
+        server             = Server.new(m.parv[2], @logger)
+        server.name        = m.parv[0]
+        server.description = m.parv[3]
+
+        $eventq.post(:server_added, server)
     end
 
     # Handles an incoming UID (user introduction)
@@ -168,7 +189,7 @@ module Protocol::TS6
     # Special constant for grabbing mode params
     GET_MODES_PARAMS = 2 ... -1
 
-    # Handles an incoming
+    # Handles an incoming SJOIN (channel burst)
     #
     # parv[0] -> timestamp
     # parv[1] -> channel name
@@ -180,24 +201,24 @@ module Protocol::TS6
         their_ts = m.parv[0].to_i
 
         # Do we already have this channel?
-        if c = Channel.channels[m.parv[1]]
+        if channel = Channel.channels[m.parv[1]]
             if their_ts < c.timestamp
                 # Remove our status modes, channel modes, and bans
-                c.members.each { |u| u.clear_status_modes(c) }
-                c.clear_modes
-                c.timestamp = their_ts
+                channel.members.each { |u| u.clear_status_modes(channel) }
+                channel.clear_modes
+                channel.timestamp = their_ts
             end
         else
-            c = Channel.new(m.parv[1], m.parv[0], @logger)
+            channel = Channel.new(m.parv[1], m.parv[0], @logger)
         end
 
         # Parse channel modes
-        if their_ts <= c.timestamp
+        if their_ts <= channel.timestamp
             modes_and_params = m.parv[GET_MODES_PARAMS]
             modes  = modes_and_params[0]
             params = modes_and_params[REMOVE_FIRST]
 
-            c.parse_modes(modes, params)
+            channel.parse_modes(modes, params)
         end
 
         # Parse the members list
@@ -219,17 +240,82 @@ module Protocol::TS6
                 uid   = uid[REMOVE_FIRST]
             end
 
-            unless u = User.users[uid]
-                log.error "Got non-existant UID #{uid} in SJOIN to #{c.name}"
+            unless user = User.users[uid]
+                log.error "got non-existant UID in SJOIN: #{uid}"
                 next
             end
 
-            c.add_user u
+            channel.add_user user
 
-            if their_ts <= c.timestamp
-                u.add_status_mode(c, :operator) if op
-                u.add_status_mode(c, :voice)    if voice
+            if their_ts <= channel.timestamp
+                if op
+                    user.add_status_mode(channel, :operator)
+
+                    $eventq.post(:mode_added_on_channel,
+                                :operator, user, channel)
+                end
+
+                if voice
+                    user.add_status_mode(channel, :voice)
+
+                    $eventq.post(:mode_added_on_channel, :voice, user, channel)
+                end
             end
         end
+    end
+
+    # Handles an incoming JOIN (non-burst channel join)
+    #
+    # parv[0] -> timestamp
+    # parv[1] -> channel name
+    # parv[2] -> '+'
+    #
+    def irc_join(m)
+        user, channel = find_uid_and_channel(m.origin, m.parv[1], 'JOIN')
+        return unless user and channel
+
+       if m.parv[0].to_i < channel.timestamp
+           # Remove our status modes, channel modes, and bans
+           channel.members.each { |u| u.clear_status_modes(channel) }
+           channel.clear_modes
+           channel.timestamp = m.parv[0].to_i
+       end
+
+       # Add them to the channel
+       channel.add_user user
+    end
+
+    # Handles an incoming PART
+    #
+    # parv[0] -> channel name
+    #
+    def irc_part(m)
+        user, channel = find_uid_and_channel(m.origin, m.parv[0], 'PART')
+        p m.parv
+
+        return unless user and channel
+
+        channel.delete_user user
+    end
+
+    # Handles an incoming TMODE
+    #
+    # parv[0] -> timestamp
+    # parv[1] -> channel name
+    # parv[2] -> mode string
+    #
+    def irc_tmode(m)
+        if m.origin.length == 3
+            user, channel   = find_uid_and_channel(m.origin, m.parv[1], 'TMODE')
+            return unless user and channel
+        else
+            channel = Channel.channels[m.parv[1]]
+            return unless channel
+        end
+
+        params = m.parv[GET_MODES_PARAMS]
+        modes  = params.delete_at(0)
+
+        channel.parse_modes(modes, params)
     end
 end

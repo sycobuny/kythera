@@ -57,10 +57,13 @@ class Channel
         @@channels[name] = self
 
         log.debug "new channel: #{name}"
+
+        $eventq.post(:channel_added, self)
     end
 
     public
 
+    # String representation is just `@name`
     def to_s
         "#{@name}"
     end
@@ -110,8 +113,6 @@ class Channel
                 mode = BOOL_MODES[c]
             end
 
-            log.debug "#{@name} #{action == :add ? '+' : '-'}#{mode} #{param}"
-
             # Add boolean modes to the channel's modes
             unless STATUS_MODES.include? c or LIST_MODES.include? c
                 if action == :add
@@ -121,12 +122,23 @@ class Channel
                 end
             end
 
+            unless STATUS_MODES.include? c
+                log.debug "mode #{action}ed: #{@name} -> #{mode} #{param}"
+            end
+
             # XXX - list modes
 
             # Status modes for users get tossed to another method so that
             # how they work can be monkeypatched by protocol modules
             #
-            parse_status_mode(mode, param) if STATUS_MODES.include? c
+            parse_status_mode(action, mode, param) if STATUS_MODES.include? c
+
+            # Post an event for it
+            if action == :add
+                $eventq.post(:mode_added_on_channel, mode, param, self)
+            elsif action == :delete
+                $eventq.post(:mode_deleted_on_channel, mode, param, self)
+            end
         end
     end
 
@@ -137,18 +149,31 @@ class Channel
     def add_user(user)
         @members[user.nickname] = user
 
-        log.debug "new user in #{@name}: #{user.nickname}"
+        log.debug "user joined #{@name}: #{user.nickname}"
+
+        $eventq.post(:user_joined_channel, user, self)
     end
 
     # Deletes a User as a member
     #
-    # @param user can be string (key) or User (value)
+    # @param [User] user User object to delete
     #
     def delete_user(user)
-        if user.kind_of? User then user = user.nickname end
-        @members.delete user
+        @members.delete user.nickname
 
-        log.debug "user left #{@name}: #{user} (#{@members.length})"
+        user.cmodes.delete self
+
+        log.debug "user parted #{@name}: #{user.nickname} (#{@members.length})"
+
+        $eventq.post(:user_parted_channel, user, self)
+
+        if @members.length == 0
+            @@channels.delete @name
+
+            log.debug "removing empty channel #{@name}"
+
+            $eventq.post(:channel_deleted, self)
+        end
     end
 
     # Deletes all modes
@@ -161,16 +186,20 @@ class Channel
     # Deals with status modes
     #
     # @param [Symbol] mode Symbol representing a mode flag
-    # @param [String] user the user this mode applies to
+    # @param [String] target the user this mode applies to
     #
-    def parse_status_mode(mode, user)
-        unless u = User.users[user]
+    def parse_status_mode(action, mode, target)
+        unless user = User.users[target]
             log.warning "cannot parse a status mode for an unknown user"
-            log.warning "#{user} -> #{mode} (#{@name})"
+            log.warning "#{target} -> #{mode} (#{@name})"
 
             return
         end
 
-        u.add_status_mode(self, mode)
+        if action == :add
+            user.add_status_mode(self, mode)
+        elsif action == :delete
+            user.delete_status_mode(self, mode)
+        end
     end
 end

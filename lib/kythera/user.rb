@@ -49,7 +49,7 @@ class User
     def add_status_mode(channel, mode)
         (@cmodes[channel] ||= []) << mode
 
-        log.debug "#{@nickname} gained status mode '#{mode}' in #{channel.name}"
+        log.debug "status mode added: #{@nickname} -> #{mode} #{channel.name}"
     end
 
     # Deletes a status mode for this user on a particular channel
@@ -67,7 +67,7 @@ class User
 
         @cmodes[channel].delete mode
 
-        log.debug "#{@nickname} lost status mode '#{mode}' in #{channel.name}"
+        log.debug "status mode deleted: #{@nickname} -> #{mode} #{channel.name}"
     end
 
     # Deletes all status modes for given channel

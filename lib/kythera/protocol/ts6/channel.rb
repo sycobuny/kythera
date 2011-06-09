@@ -31,6 +31,8 @@ class Channel
         @@channels[name] = self
 
         log.debug "new channel: #{name} (#{timestamp})"
+
+        $eventq.post(:channel_added, self)
     end
 
     public
@@ -42,18 +44,31 @@ class Channel
     def add_user(user)
         @members[user.uid] = user
 
-        log.debug "new user in #{@name}: #{user.nickname} [#{user.uid}]"
+        log.debug "user joined #{@name}: #{user.nickname}"
+
+        $eventq.post(:user_joined_channel, user, self)
     end
 
     # Deletes a User as a member
     #
-    # @param user can be string (UID) or User object
+    # @param [User] user User object to delete
     #
     def delete_user(user)
-        if user.kind_of? User then user = user.uid end
-        @members.delete user
+        @members.delete user.uid
 
-        log.debug "user left #{@name}: #{user} (#{@members.length})"
+        user.cmodes.delete self
+
+        log.debug "user parted #{@name}: #{user.nickname} (#{@members.length})"
+
+        $eventq.post(:user_parted_channel, user, self)
+
+        if @members.length == 0
+            @@channels.delete @name
+
+            log.debug "removing empty channel #{@name}"
+
+            $eventq.post(:channel_deleted, self)
+        end
     end
 
     # Writer for `@timestamp`
