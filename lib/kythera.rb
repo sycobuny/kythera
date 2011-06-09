@@ -39,7 +39,7 @@ require 'kythera/user'
 
 # I know globals are evil etc. but this is just plain easier
 $config = Object.new
-$eventq = EventQueue.new
+$eventq = nil
 
 class << $config
     # Adds methods to the parser from an arbitrary module
@@ -119,9 +119,9 @@ module Kythera::Configuration
     # @param [String] name the server name
     # @param [Proc] block contains the actual configuraiton code
     #
-    def uplink(name, port = 6667, &block)
+    def uplink(host, port = 6667, &block)
         ul      = OpenStruct.new
-        ul.name = name
+        ul.host = host
         ul.port = port
 
         ul.extend Kythera::Configuration::Uplink
@@ -229,6 +229,10 @@ module Kythera::Configuration::Uplink
 
     def priority(pri)
         self.priority = pri.to_i
+    end
+
+    def name(name)
+        self.name = name
     end
 
     def bind(host, port = nil)

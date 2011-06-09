@@ -38,9 +38,12 @@ class EventQueue
     attr_reader :handlers
 
     # Creates a new EventQueue
-    def initialize
+    def initialize(logger)
         @queue    = []
         @handlers = {}
+        @logger   = logger
+
+        log.debug 'new EventQueue'
     end
 
     public
@@ -52,7 +55,7 @@ class EventQueue
     #
     def post(event, *args)
         @queue << Event.new(event, *args)
-        log.debug "posted new event: #{event}"
+        #log.debug "posted new event: #{event}"
     end
 
     # Registers a handler for an event
@@ -62,7 +65,7 @@ class EventQueue
     #
     def handle(event, &block)
         (@handlers[event] ||= []) << block
-        log.debug "registered handler for event: #{event}"
+        #log.debug "registered handler for event: #{event}"
     end
 
     # Does the queue need emptied?
@@ -77,11 +80,11 @@ class EventQueue
     def run
         while e = @queue.shift
             unless @handlers[e.event]
-                log.debug "no handlers for event: #{e.event}"
+                #log.debug "no handlers for event: #{e.event}"
                 next
             end
 
-            log.debug "dispatching handlers for event: #{e.event}"
+            #log.debug "dispatching handlers for event: #{e.event}"
             @handlers[e.event].each { |block| block.call(*e.args) }
         end
     end

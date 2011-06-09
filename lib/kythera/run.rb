@@ -26,6 +26,7 @@ class Kythera
         # Some defaults for state
         logging  = true
         @logger  = nil
+        @uplink  = nil
         debug    = false
         willfork = RUBY_PLATFORM =~ /win32/i ? false : true
         wd       = Dir.getwd
@@ -82,9 +83,6 @@ class Kythera
 
         self.log_level = $config.me.logging if logging or debug
 
-        # Give the eventq logging for debugging
-        $eventq.logger = @logger
-
         # Write a pid file
         Dir.mkdir 'var' unless File.exists? 'var'
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
@@ -108,9 +106,6 @@ class Kythera
             # If it's true we're connectED, if it's nil we're connectING
             connect until @uplink and @uplink.connected?
 
-            # Run the event loop until it's empty
-            $eventq.run while $eventq.needs_run?
-
             # Only check for writable if we have data waiting to be written
             writefd = [@uplink.socket] if @uplink.need_write?
 
@@ -122,6 +117,9 @@ class Kythera
 
             $eventq.post :socket_readable unless ret[0].empty?
             $eventq.post :socket_writable unless ret[1].empty?
+
+            # Run the event loop until it's empty
+            $eventq.run while $eventq.needs_run?
         end
     end
 
@@ -134,14 +132,14 @@ class Kythera
             curruli += 1
             curruli  = 0 if curruli > ($config.uplinks.length - 1)
 
-            @uplink = Uplink.new $config.uplinks[curruli]
+            $eventq = EventQueue.new @logger
+            @uplink = Uplink.new($config.uplinks[curruli], @logger)
 
             sleep $config.me.reconnect_time
         else
-            @uplink = Uplink.new $config.uplinks[0]
+            $eventq = EventQueue.new @logger
+            @uplink = Uplink.new($config.uplinks[0], @logger)
         end
-
-        @uplink.logger = @logger if @logger
 
         @uplink.connect
     end

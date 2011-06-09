@@ -81,6 +81,9 @@ configure do
         #
         priority 1;
 
+        # If the server name differs from the connection address, specify here
+        name 'test.malkier.net'
+
         # If you need to bind to a specific IP when connecting to the
         # uplink specify it here. You can also specify a local port.
         #

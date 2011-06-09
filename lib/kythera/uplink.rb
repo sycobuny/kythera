@@ -19,11 +19,12 @@ class Uplink
     attr_accessor :socket
 
     # Creates a new Uplink and includes the protocol-specific methods
-    def initialize(config)
+    def initialize(config, logger)
         @config    = config
         @connected = false
         @recvq     = []
         @sendq     = []
+        @logger    = logger
 
         $eventq.handle(:socket_readable) { read  }
         $eventq.handle(:socket_writable) { write }
@@ -87,17 +88,20 @@ class Uplink
 
             $eventq.post :disconnected
 
-            @socket    = nil
+            @socket.close if @socket
+            @recvq.clear
+
             @connected = false
+            @socket    = nil
         end
     end
 
     # Connects to the uplink using the information in `@config`
     def connect
-        log.info "connecting to #{@config.name}:#{@config.port}"
+        log.info "connecting to #{@config.host}:#{@config.port}"
 
         begin
-            @socket = TCPSocket.new(@config.name, @config.port,
+            @socket = TCPSocket.new(@config.host, @config.port,
                                     @config.bind_host, @config.bind_port)
         rescue Exception => err
             log.error "connection failed: #{err}"

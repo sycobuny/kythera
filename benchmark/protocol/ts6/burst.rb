@@ -15,8 +15,7 @@ require 'benchmark/ips'
 require 'logger'
 require 'ostruct'
 
-$eventq = EventQueue.new
-$eventq.logger = Logger.new($stdout)
+$eventq = EventQueue.new Logger.new($stdout)
 $eventq.log_level = :fatal
 
 config = OpenStruct.new

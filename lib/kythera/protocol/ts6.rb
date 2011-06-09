@@ -35,7 +35,7 @@ module Protocol::TS6
 
     # CAPAB :<CAPABS>
     def send_capab
-        @sendq << 'CAPAB :QS KLN UNKLN ENCAP'
+        @sendq << 'CAPAB :QS EX IE KLN UNKLN ENCAP'
     end
 
     # SERVER <NAME> <HOPS> :<DESC>
@@ -67,8 +67,7 @@ module Protocol::TS6
     def irc_pass(m)
         if m.parv[0] != @config.receive_password.to_s
             log.error "incorrect password received from `#{@config.name}`"
-            @recvq.clear
-            @connection.close
+            self.dead = true
         else
             Server.new(m.parv[3], @logger)
         end
@@ -81,9 +80,31 @@ module Protocol::TS6
     # parv[2] -> server description
     #
     def irc_server(m)
-        not_used, s   = Server.servers.first # There should only be one
+        if m.origin
+            # If we have an origin, then this is a new server introduction.
+            # This sucks, because this is not a TS6 server introduction, and
+            # we specifically state we only speak TS6, but it doesn't seem like
+            # they care, so now we have to deal with this anyway.
+            #
+            s = Server.new('ts5_' + rand(99999).to_s, @logger)
+        else
+            # No origin means we're handshaking, so this must be our uplink
+            not_used, s = Server.servers.first
+
+            unless m.parv[0] == @config.name
+                log.error "name mismatch from uplink"
+                log.error "#{m.parv[0]} != #{@config.name}"
+
+                self.dead = true
+
+                return
+            end
+        end
+
         s.name        = m.parv[0]
         s.description = m.parv[2]
+
+        log.debug "new server: #{m.parv[0]}"
     end
 
     # Handles an incoming SVINFO
