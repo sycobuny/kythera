@@ -16,7 +16,7 @@ class Uplink
     attr_accessor :config
 
     # The TCPSocket
-    attr_accessor :socket
+    attr_reader :socket
 
     # Creates a new Uplink and includes the protocol-specific methods
     def initialize(config, logger)
@@ -24,6 +24,7 @@ class Uplink
         @connected = false
         @recvq     = []
         @sendq     = []
+        @socket    = nil
         @logger    = logger
 
         $eventq.handle(:socket_readable) { read  }

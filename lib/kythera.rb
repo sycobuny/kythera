@@ -256,11 +256,11 @@ module Kythera::Configuration::Uplink
         self.protocol = protocol
 
         # Check to see if they specified a valid protocol
-        unless File.exists? "lib/kythera/protocol/#{protocol.to_s.downcase}.rb"
+        begin
+            require "kythera/protocol/#{protocol.to_s.downcase}"
+        rescue LoadError
             raise "invalid protocol `#{protocol}` for uplink `#{name}`"
         end
-
-        require "kythera/protocol/#{protocol.to_s.downcase}"
 
         proto = Protocol.find protocol
 
