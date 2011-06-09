@@ -6,10 +6,19 @@
 # Rights to this code are documented in LICENSE
 #
 
+require 'kythera'
+
 # A mixin to add easy logging to your class
 # Just `include Loggable` and call `self.logger=`
 #
 module Loggable
+    # This class allows us to turn off logging easily
+    class NilLogger
+        include Singleton
+
+        def method_missing(name, *args)
+        end
+    end
 
     # This class overrides the default output formatting.
     # There's no documented way to do this; I had to figure it out.
@@ -57,10 +66,9 @@ module Loggable
     # @param [Logger] logger the Logger to use (duck typing works fine here)
     #
     def logger=(logger)
-
         # Set to false/nil to disable logging...
         unless logger
-            @logger = nil
+            @logger = NilLogger.instance
             return
         end
 

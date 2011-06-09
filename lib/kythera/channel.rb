@@ -48,8 +48,9 @@ class Channel
     # Creates a new channel. Should be patched by the protocol module.
     def initialize(name, logger)
         @name   = name
-        @logger = logger
         @modes  = []
+
+        self.logger = logger
 
         # Keyed by nickname by default
         @members = {}

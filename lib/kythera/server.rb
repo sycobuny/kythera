@@ -31,6 +31,6 @@ class Server
 
     # Creates a new server. Should be patched by the protocol module.
     def initialize(logger)
-        @logger = logger
+        self.logger = logger
     end
 end

@@ -15,8 +15,9 @@ class Server
 
     # Creates a new Server and adds it to the list keyed by SID
     def initialize(sid, logger)
-        @sid    = sid
-        @logger = logger
+        @sid = sid
+
+        self.logger = logger
 
         @@servers[sid] = self
 

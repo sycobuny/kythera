@@ -33,8 +33,9 @@ class User
         @hostname = host
         @realname = real
 
-        @logger = logger
         @cmodes = {}
+
+        self.logger = logger
 
         @@users[nick] = self
     end

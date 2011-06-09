@@ -24,6 +24,7 @@ end
 require 'logger'
 require 'optparse'
 require 'ostruct'
+require 'singleton'
 require 'socket'
 
 # Require all of our files here and only here

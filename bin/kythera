@@ -7,7 +7,10 @@
 # Rights to this code are documented in LICENSE
 #
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
+
 require 'kythera'
+
+Dir.chdir File.expand_path('..', File.dirname(__FILE__))
 
 #
 # This is the configuration. Edit from here down.

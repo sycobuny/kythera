@@ -53,14 +53,17 @@ class Kythera
             abort
         end
 
-        # Debugging stuff
+        # Logging stuff
         if debug
             $-w = true
+            logging = true
             $config.me.logging = :debug
 
             puts "#{ME}: warning: debug mode enabled"
             puts "#{ME}: warning: all activity will be logged in the clear"
         end
+
+        self.logger = nil unless logging
 
         # Are we already running?
         check_running
@@ -69,7 +72,7 @@ class Kythera
         if willfork
             daemonize wd
 
-            if logging or debug
+            if logging
                 Dir.mkdir 'var' unless File.exists? 'var'
                 self.logger = Logger.new('var/kythera.log', 'weekly')
             end
@@ -78,10 +81,10 @@ class Kythera
             puts "#{ME}: running in foreground mode from #{wd}"
 
             # Foreground logging
-            self.logger = Logger.new($stdout) if logging or debug
+            self.logger = Logger.new($stdout) if logging
         end
 
-        self.log_level = $config.me.logging if logging or debug
+        self.log_level = $config.me.logging if logging
 
         # Write a pid file
         Dir.mkdir 'var' unless File.exists? 'var'
