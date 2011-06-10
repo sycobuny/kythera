@@ -81,8 +81,8 @@ class Channel
     #
     def timestamp=(timestamp)
         if timestamp.to_i > @timestamp
-            log.warning "changing timestamp to a later value?"
-            log.warning "#{@name} -> #{timestamp} > #{@timestamp}"
+            log.warn "changing timestamp to a later value?"
+            log.warn "#{@name} -> #{timestamp} > #{@timestamp}"
         end
 
         log.debug "#{@name}: timestamp changed: #{@timestamp} -> #{timestamp}"

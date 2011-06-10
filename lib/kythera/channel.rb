@@ -192,8 +192,8 @@ class Channel
     #
     def parse_status_mode(action, mode, target)
         unless user = User.users[target]
-            log.warning "cannot parse a status mode for an unknown user"
-            log.warning "#{target} -> #{mode} (#{self})"
+            log.warn "cannot parse a status mode for an unknown user"
+            log.warn "#{target} -> #{mode} (#{self})"
 
             return
         end

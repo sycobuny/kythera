@@ -99,23 +99,26 @@ module Protocol::TS6
     def irc_server(m)
         if m.origin
             # If we have an origin, then this is a new server introduction.
-            # This sucks, because this is not a TS6 server introduction, and
-            # we specifically state we only speak TS6, but it doesn't seem like
-            # they care, so now we have to deal with this anyway.
+            # However this is a TS5 introduction, and we only support TS6-only
+            # networks, so spit out a warning and ignore it.
             #
-            server = Server.new('ts5_' + rand(99999).to_s, @logger)
-        else
-            # No origin means we're handshaking, so this must be our uplink
-            not_used, server = Server.servers.first
+            log.warn 'got non-TS6 server introduction on TS6-only network:'
+            log.warn "#{m.parv[0]} (#{m.parv[2]})"
 
-            unless m.parv[0] == @config.name
-                log.error "name mismatch from uplink"
-                log.error "#{m.parv[0]} != #{@config.name}"
+            return
+        end
 
-                self.dead = true
+        # No origin means we're handshaking, so this must be our uplink
+        not_used, server = Server.servers.first
 
-                return
-            end
+        # Make sure their name matches what we expect
+        unless m.parv[0] == @config.name
+            log.error "name mismatch from uplink"
+            log.error "#{m.parv[0]} != #{@config.name}"
+
+            self.dead = true
+
+            return
         end
 
         server.name        = m.parv[0]
@@ -134,12 +137,18 @@ module Protocol::TS6
     # parv[3] -> current ts
     #
     def irc_svinfo(m)
+        ts_delta = m.parv[3].to_i - Time.now.to_i
+
         if m.parv[0].to_i < 6
-            log.error "`#{@config.name}` doesn't support TS6"
-            @recvq.clear
-            @connection.close
-        elsif (m.parv[3].to_i - Time.now.to_i) >= 60
-            log.warning "`#{@config.name}` has excessive TS delta"
+            log.error "#{@config.name} doesn't support TS6"
+            self.dead = true
+        elsif ts_delta >= 60
+            log.warn "#{@config.name} has excessive TS delta"
+            log.warn "#{m.parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+        elsif ts_delta >= 300
+            log.error "#{@config.name} TS delta exceeds five minutes"
+            log.error "#{m.parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            self.dead = true
         end
     end
 
@@ -172,7 +181,10 @@ module Protocol::TS6
     # parv[1] -> server's uplink's name
     #
     def irc_squit(m)
-        server = Server.servers.delete m.parv[0]
+        unless server = Server.servers.delete(m.parv[0])
+            log.error "received SQUIT for unknown SID: #{m.parv[0]}"
+            return
+        end
 
         # Remove all their users to comply with CAPAB QS
         server.users.each { |u| User.users.delete u.uid }
@@ -196,7 +208,7 @@ module Protocol::TS6
         p = m.parv
 
         unless server = Server.servers[m.origin]
-            log.error "got UID from unknown SID #{m.origin}"
+            log.error "got UID from unknown SID: #{m.origin}"
             return
         end
 
@@ -210,7 +222,10 @@ module Protocol::TS6
     # parv[0] -> quit message
     #
     def irc_quit(m)
-        user = User.users.delete m.origin
+        unless user = User.users.delete(m.origin)
+            log.error "received QUIT for unknown UID: #{m.origin}"
+            return
+        end
 
         user.server.delete_user user
 

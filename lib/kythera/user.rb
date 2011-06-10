@@ -61,8 +61,8 @@ class User
     #
     def delete_status_mode(channel, mode)
         unless @cmodes[channel]
-            log.warning "cannot remove mode from a channel with no known modes"
-            log.warning "#{channel} -> #{mode}"
+            log.warn "cannot remove mode from a channel with no known modes"
+            log.warn "#{channel} -> #{mode}"
 
             return
         end
@@ -78,8 +78,8 @@ class User
     #
     def clear_status_modes(channel)
         unless @cmodes[channel]
-            log.warning "cannot clear modes from a channel with no known modes"
-            log.warning "#{channel} -> clear all modes"
+            log.warn "cannot clear modes from a channel with no known modes"
+            log.warn "#{channel} -> clear all modes"
 
             return
         end
