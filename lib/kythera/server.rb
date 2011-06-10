@@ -55,7 +55,7 @@ class Server
     # @param [User] user User object to delete
     #
     def delete_user(user)
-        @users.delete user
+        @users.delete(user)
         log.debug "user left #{@name}: #{user.nickname} (#{@users.length})"
     end
 end

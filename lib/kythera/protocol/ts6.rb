@@ -214,7 +214,7 @@ module Protocol::TS6
 
         u = User.new(server, p[0], p[4], p[5], p[6], p[8], p[7], p[2], @logger)
 
-        server.add_user u
+        server.add_user(u)
     end
 
     # Handles an incoming QUIT
@@ -227,7 +227,7 @@ module Protocol::TS6
             return
         end
 
-        user.server.delete_user user
+        user.server.delete_user(user)
 
         log.debug "user quit: #{user.nickname} [#{user.uid}]"
     end
@@ -298,7 +298,7 @@ module Protocol::TS6
                 end
             end
 
-            channel.add_user user
+            channel.add_user(user)
 
             if their_ts <= channel.timestamp
                 if op
@@ -335,7 +335,7 @@ module Protocol::TS6
        end
 
        # Add them to the channel
-       channel.add_user user
+       channel.add_user(user)
     end
 
     # Handles an incoming PART
@@ -347,7 +347,7 @@ module Protocol::TS6
 
         return unless user and channel
 
-        channel.delete_user user
+        channel.delete_user(user)
     end
 
     # Handles an incoming KICK
@@ -361,7 +361,7 @@ module Protocol::TS6
 
         return unless user and channel
 
-        channel.delete_user user
+        channel.delete_user(user)
     end
 
     # Handles an incoming TMODE

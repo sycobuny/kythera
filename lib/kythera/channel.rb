@@ -120,7 +120,7 @@ class Channel
                 if action == :add
                     @modes << mode
                 else
-                    @modes.delete mode
+                    @modes.delete(mode)
                 end
             end
 
@@ -163,7 +163,7 @@ class Channel
     def delete_user(user)
         @members.delete user.nickname
 
-        user.cmodes.delete self
+        user.cmodes.delete(self)
 
         log.debug "user parted #{self}: #{user.nickname} (#{@members.length})"
 

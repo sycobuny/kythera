@@ -68,7 +68,7 @@ class User
             return
         end
 
-        @cmodes[channel].delete mode
+        @cmodes[channel].delete(mode)
 
         log.debug "status mode deleted: #{@nickname}/#{channel} -> #{mode}"
     end

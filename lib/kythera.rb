@@ -48,7 +48,7 @@ class << $config
     # @param [Module] mod the module containing methods to add
     #
     def use(mod)
-        $config.extend mod
+        $config.extend(mod)
     end
 end
 
@@ -165,7 +165,7 @@ module Kythera::Configuration::Daemon
     # @param [Module] mod the module containing methods to add
     #
     def use(mod)
-        self.extend mod
+        self.extend(mod)
     end
 
     private
@@ -223,7 +223,7 @@ module Kythera::Configuration::Uplink
     # @param [Module] mod the module containing methods to add
     #
     def use(mod)
-        self.extend mod
+        self.extend(mod)
     end
 
     private
@@ -263,7 +263,7 @@ module Kythera::Configuration::Uplink
             raise "invalid protocol `#{protocol}` for uplink `#{name}`"
         end
 
-        proto = Protocol.find protocol
+        proto = Protocol.find(protocol)
 
         raise "invalid protocol `#{protocol}` for uplink `#{name}`" unless proto
     end
@@ -298,7 +298,7 @@ module Kythera::Configuration::UserServ
     # @param [Module] mod the module containing methods to add
     #
     def use(mod)
-        self.extend mod
+        self.extend(mod)
     end
 
     private

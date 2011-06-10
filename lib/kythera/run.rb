@@ -70,7 +70,7 @@ class Kythera
 
         # Time to fork...
         if willfork
-            daemonize wd
+            daemonize(wd)
 
             if logging
                 Dir.mkdir 'var' unless File.exists? 'var'
@@ -210,7 +210,7 @@ class Kythera
         end
 
         # This is the child process
-        Dir.chdir wd
+        Dir.chdir(wd)
     end
 
     # Cleans up before exiting

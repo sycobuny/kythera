@@ -60,7 +60,7 @@ class Channel
     def delete_user(user)
         @members.delete user.uid
 
-        user.cmodes.delete self
+        user.cmodes.delete(self)
 
         log.debug "user parted #{@name}: #{user.nickname} (#{@members.length})"
 
