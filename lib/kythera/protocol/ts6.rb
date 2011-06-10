@@ -21,7 +21,7 @@ module Protocol::TS6
     ###########
 
     # Finds a User and Channel or errors
-    def find_uid_and_channel(uid, name, command)
+    def find_user_and_channel(uid, name, command)
         unless user = User.users[uid]
             log.error "got non-existant UID in #{command}: #{uid}"
         end
@@ -324,7 +324,7 @@ module Protocol::TS6
     # parv[2] -> '+'
     #
     def irc_join(m)
-        user, channel = find_uid_and_channel(m.origin, m.parv[1], 'JOIN')
+        user, channel = find_user_and_channel(m.origin, m.parv[1], :JOIN)
         return unless user and channel
 
        if m.parv[0].to_i < channel.timestamp
@@ -343,7 +343,21 @@ module Protocol::TS6
     # parv[0] -> channel name
     #
     def irc_part(m)
-        user, channel = find_uid_and_channel(m.origin, m.parv[0], 'PART')
+        user, channel = find_user_and_channel(m.origin, m.parv[0], :PART)
+
+        return unless user and channel
+
+        channel.delete_user user
+    end
+
+    # Handles an incoming KICK
+    #
+    # parv[0] -> channel name
+    # parv[1] -> UID of kicked user
+    # parv[2] -> kick reason
+    #
+    def irc_kick(m)
+        user, channel = find_user_and_channel(m.parv[1], m.parv[0], :KICK)
 
         return unless user and channel
 
@@ -358,7 +372,7 @@ module Protocol::TS6
     #
     def irc_tmode(m)
         if m.origin.length == 3
-            user, channel   = find_uid_and_channel(m.origin, m.parv[1], 'TMODE')
+            user, channel = find_user_and_channel(m.origin, m.parv[1], :TMODE)
             return unless user and channel
         else
             channel = Channel.channels[m.parv[1]]

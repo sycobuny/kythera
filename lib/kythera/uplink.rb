@@ -199,7 +199,11 @@ class Uplink
             cmd = "irc_#{cmd.downcase}".to_sym
 
             # Call the protocol-specific handler
-            self.send(cmd, m) if self.respond_to?(cmd, true)
+            if self.respond_to?(cmd, true)
+                self.send(cmd, m)
+            else
+                log.warn "no protocol handler for #{cmd.upcase}"
+            end
 
             # Fire off an event for extensions, etc
             $eventq.post(cmd, m)

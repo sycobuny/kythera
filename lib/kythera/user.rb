@@ -24,10 +24,11 @@ class User
     end
 
     # Instance attributes
-    attr_reader :nickname, :username, :hostname, :realname, :cmodes
+    attr_reader :server, :nickname, :username, :hostname, :realname, :cmodes
 
     # Creates a new user. Should be patched by the protocol module.
-    def initialize(nick, user, host, real, logger)
+    def initialize(server, nick, user, host, real, logger)
+        @server   = server
         @nickname = nick
         @username = user
         @hostname = host
