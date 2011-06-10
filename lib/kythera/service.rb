@@ -9,6 +9,8 @@
 require 'kythera'
 
 # This is the base class for a service. All services modules must subclass this.
+# For the full documentation see `doc/SERVICES.md`
+#
 class Service
     include Loggable
 
@@ -37,8 +39,10 @@ class Service
         @logger = nil
 
         self.logger = logger
+    end
 
-        # Set up your events here, like:
-        # $eventq.handle(:irc_privmsg) { my_privmsg_parser }
+    # You must override this or your service doesn't do too much huh?
+    def irc_privmsg(user, params)
+        log.error "I'm a service that didn't override irc_privmsg!"
     end
 end
