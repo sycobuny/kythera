@@ -14,7 +14,8 @@ class User
     attr_reader :ip, :timestamp, :uid
 
     # Creates a new user and adds it to the list keyed by UID
-    def initialize(nick, user, host, ip, real, uid, ts, logger)
+    def initialize(server, nick, user, host, ip, real, uid, ts, logger)
+        @server    = server
         @nickname  = nick
         @username  = user
         @hostname  = host
@@ -22,8 +23,12 @@ class User
         @realname  = real
         @uid       = uid
         @timestamp = ts
-        @logger    = logger
         @cmodes    = {}
+        @logger    = nil
+
+        self.logger = logger
+
+        log.error "new user replacing user with same UID!" if @@users[uid]
 
         @@users[uid] = self
 

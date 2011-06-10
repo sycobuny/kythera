@@ -49,6 +49,7 @@ class Channel
     def initialize(name, logger)
         @name   = name
         @modes  = []
+        @logger = nil
 
         self.logger = logger
 

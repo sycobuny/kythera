@@ -29,8 +29,33 @@ class Server
     # The server's description
     attr_accessor :description
 
+    # The Users on this server
+    attr_reader :users
+
     # Creates a new server. Should be patched by the protocol module.
     def initialize(logger)
+        @logger     = nil
+        @users      = []
         self.logger = logger
+    end
+
+    public
+
+    # Adds a User as a member
+    #
+    # @param [User] user the User to add
+    #
+    def add_user(user)
+        @users << user
+        log.debug "user joined #{@name}: #{user.nickname}"
+    end
+
+    # Deletes a User as a member
+    #
+    # @param [User] user User object to delete
+    #
+    def delete_user(user)
+        @users.delete user
+        log.debug "user left #{@name}: #{user.nickname} (#{@users.length})"
     end
 end

@@ -25,11 +25,11 @@ class Kythera
 
         # Some defaults for state
         logging  = true
-        @logger  = nil
-        @uplink  = nil
         debug    = false
         willfork = RUBY_PLATFORM =~ /win32/i ? false : true
         wd       = Dir.getwd
+        @uplink  = nil
+        @logger  = nil
 
         # Do command-line options
         opts = OptionParser.new

@@ -32,6 +32,7 @@ class User
         @username = user
         @hostname = host
         @realname = real
+        @logger   = nil
 
         @cmodes = {}
 

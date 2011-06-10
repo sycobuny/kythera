@@ -41,7 +41,9 @@ class EventQueue
     def initialize(logger)
         @queue    = []
         @handlers = {}
-        @logger   = logger
+        @logger   = nil
+
+        self.logger = logger
 
         log.debug 'new EventQueue'
     end

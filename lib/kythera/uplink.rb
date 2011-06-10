@@ -25,7 +25,9 @@ class Uplink
         @recvq     = []
         @sendq     = []
         @socket    = nil
-        @logger    = logger
+        @logger    = nil
+
+        self.logger = logger
 
         $eventq.handle(:socket_readable) { read  }
         $eventq.handle(:socket_writable) { write }

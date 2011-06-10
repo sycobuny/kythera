@@ -166,6 +166,23 @@ module Protocol::TS6
         $eventq.post(:server_added, server)
     end
 
+    # Handles an incoming SQUIT (server disconnection)
+    #
+    # parv[0] -> SID leaving
+    # parv[1] -> server's uplink's name
+    #
+    def irc_squit(m)
+        server = Server.servers.delete m.parv[0]
+
+        # This is probably hideous slow - XXX
+        server.users.dup.each do |u|
+            User.users.delete u.uid
+            server.delete_user u
+        end
+
+        log.debug "server leaving: #{m.parv[0]}"
+    end
+
     # Handles an incoming UID (user introduction)
     #
     # parv[0] -> nickname
@@ -180,7 +197,27 @@ module Protocol::TS6
     #
     def irc_uid(m)
         p = m.parv
-        User.new(p[0], p[4], p[5], p[6], p[8], p[7], p[2], @logger)
+
+        unless server = Server.servers[m.origin]
+            log.error "got UID from unknown SID #{m.origin}"
+            return
+        end
+
+        u = User.new(server, p[0], p[4], p[5], p[6], p[8], p[7], p[2], @logger)
+
+        server.add_user u
+    end
+
+    # Handles an incoming QUIT
+    #
+    # parv[0] -> quit message
+    #
+    def irc_quit(m)
+        user = User.users.delete m.origin
+
+        user.server.delete_user user
+
+        log.debug "user quit: #{user.nickname} [#{user.uid}]"
     end
 
     # Removes the first character of the string
@@ -218,7 +255,7 @@ module Protocol::TS6
             modes  = modes_and_params[0]
             params = modes_and_params[REMOVE_FIRST]
 
-            channel.parse_modes(modes, params)
+            channel.parse_modes(modes, params) unless modes == '0'
         end
 
         # Parse the members list
@@ -241,8 +278,12 @@ module Protocol::TS6
             end
 
             unless user = User.users[uid]
-                log.error "got non-existant UID in SJOIN: #{uid}"
-                next
+                # Maybe it's a nickname?
+                not_used, user = User.users.find { |k, v| v.nickname == uid }
+                unless user
+                    log.error "got non-existant UID in SJOIN: #{uid}"
+                    next
+                end
             end
 
             channel.add_user user

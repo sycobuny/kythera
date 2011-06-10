@@ -15,9 +15,13 @@ class Server
 
     # Creates a new Server and adds it to the list keyed by SID
     def initialize(sid, logger)
-        @sid = sid
+        @sid    = sid
+        @users  = []
+        @logger = nil
 
         self.logger = logger
+
+        log.error "new server replacing server with same SID!" if @@servers[sid]
 
         @@servers[sid] = self
 

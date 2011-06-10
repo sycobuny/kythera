@@ -22,11 +22,15 @@ class Channel
     def initialize(name, timestamp, logger)
         @name      = name
         @timestamp = timestamp.to_i
-        @logger    = logger
         @modes     = []
+        @logger    = nil
 
         # Keyed by UID
         @members = {}
+
+        self.logger = logger
+
+        log.error "new channel #{@name} already exists!" if @@channels[name]
 
         @@channels[name] = self
 
