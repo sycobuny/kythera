@@ -174,11 +174,8 @@ module Protocol::TS6
     def irc_squit(m)
         server = Server.servers.delete m.parv[0]
 
-        # This is probably hideous slow - XXX
-        server.users.dup.each do |u|
-            User.users.delete u.uid
-            server.delete_user u
-        end
+        # Remove all their users to comply with CAPAB QS
+        server.users.each { |u| User.users.delete u.uid }
 
         log.debug "server leaving: #{m.parv[0]}"
     end
