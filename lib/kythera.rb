@@ -35,6 +35,7 @@ require 'kythera/message'
 require 'kythera/protocol'
 require 'kythera/run'
 require 'kythera/server'
+require 'kythera/service'
 require 'kythera/uplink'
 require 'kythera/user'
 
