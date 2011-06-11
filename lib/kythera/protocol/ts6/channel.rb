@@ -15,7 +15,7 @@ class Channel
                      'e' => :except,
                      'I' => :invex }
 
-    # Instance attributes
+    # The channel's timestamp
     attr_reader :timestamp
 
     # Creates a new channel and adds it to the list keyed by name
@@ -60,7 +60,7 @@ class Channel
     def delete_user(user)
         @members.delete user.uid
 
-        user.cmodes.delete(self)
+        user.status_modes.delete(self)
 
         log.debug "user parted #{@name}: #{user.nickname} (#{@members.length})"
 

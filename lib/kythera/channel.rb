@@ -42,8 +42,20 @@ class Channel
         @@channels
     end
 
-    # Instance attributes
-    attr_reader :name, :key, :limit, :members, :modes
+    # The channel name, including prefix
+    attr_reader :name
+
+    # If the channel is +k, this is the key
+    attr_reader :key
+
+    # If the channel is +l, this is the limit
+    attr_reader :limit
+
+    # A Hash of members keyed by nickname
+    attr_reader :members
+
+    # An Array of mode Symbols
+    attr_reader :modes
 
     # Creates a new channel. Should be patched by the protocol module.
     def initialize(name, logger)
@@ -163,7 +175,7 @@ class Channel
     def delete_user(user)
         @members.delete user.nickname
 
-        user.cmodes.delete(self)
+        user.status_modes.delete(self)
 
         log.debug "user parted #{self}: #{user.nickname} (#{@members.length})"
 

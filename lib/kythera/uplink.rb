@@ -170,8 +170,10 @@ class Uplink
 
     private
 
-    # This is predefined as an optimization
+    # Removes the first character from a string
     NO_COL = 1 .. -1
+
+    # Because String#split treats ' ' as /\s/ for some reason
     RE_SPACE = / /
 
     # Parses incoming IRC data and sends it off to protocol-specific handlers

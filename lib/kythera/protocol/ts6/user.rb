@@ -10,8 +10,14 @@ require 'kythera'
 
 # This reopens the base User class in `kythera/user.rb`
 class User
-    # Instance attributes
-    attr_reader :ip, :timestamp, :uid
+    # The user's IP address
+    attr_reader :ip
+
+    # The user's timestamp
+    attr_reader :timestamp
+
+    # The user's UID
+    attr_reader :uid
 
     # Creates a new user and adds it to the list keyed by UID
     def initialize(server, nick, user, host, ip, real, uid, ts, logger)
@@ -23,10 +29,10 @@ class User
         @realname  = real
         @uid       = uid
         @timestamp = ts
-        @cmodes    = {}
         @logger    = nil
 
-        self.logger = logger
+        @status_modes = {}
+        self.logger   = logger
 
         log.error "new user replacing user with same UID!" if @@users[uid]
 

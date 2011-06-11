@@ -8,6 +8,9 @@
 
 require 'kythera'
 
+# The global EventQueue
+$eventq = nil
+
 # Contains information about a posted event
 class Event
     # The name of the event

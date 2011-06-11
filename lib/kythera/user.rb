@@ -23,8 +23,23 @@ class User
         @@users
     end
 
-    # Instance attributes
-    attr_reader :server, :nickname, :username, :hostname, :realname, :cmodes
+    # The user's Server object
+    attr_reader :server
+
+    # The user's nickname
+    attr_reader :nickname
+
+    # The user's username
+    attr_reader :username
+
+    # The user's hostname
+    attr_reader :hostname
+
+    # The user's gecos/realname
+    attr_reader :realname
+
+    # A Hash keyed by Channel of the user's status modes
+    attr_reader :status_modes
 
     # Creates a new user. Should be patched by the protocol module.
     def initialize(server, nick, user, host, real, logger)
@@ -35,9 +50,8 @@ class User
         @realname = real
         @logger   = nil
 
-        @cmodes = {}
-
-        self.logger = logger
+        @status_modes = {}
+        self.logger   = logger
 
         @@users[nick] = self
     end
@@ -50,7 +64,7 @@ class User
     # @param [Symbol] mode a Symbol representing the mode flag
     #
     def add_status_mode(channel, mode)
-        (@cmodes[channel] ||= []) << mode
+        (@status_modes[channel] ||= []) << mode
 
         log.debug "status mode added: #{@nickname}/#{channel} -> #{mode}"
     end
@@ -61,14 +75,14 @@ class User
     # @param [Symbol] mode a Symbol representing the mode flag
     #
     def delete_status_mode(channel, mode)
-        unless @cmodes[channel]
+        unless @status_modes[channel]
             log.warn "cannot remove mode from a channel with no known modes"
             log.warn "#{channel} -> #{mode}"
 
             return
         end
 
-        @cmodes[channel].delete(mode)
+        @status_modes[channel].delete(mode)
 
         log.debug "status mode deleted: #{@nickname}/#{channel} -> #{mode}"
     end
@@ -78,13 +92,13 @@ class User
     # @param [Channel] channel the Channel object to clear modes for
     #
     def clear_status_modes(channel)
-        unless @cmodes[channel]
+        unless @status_modes[channel]
             log.warn "cannot clear modes from a channel with no known modes"
             log.warn "#{channel} -> clear all modes"
 
             return
         end
 
-        @cmodes[channel] = []
+        @status_modes[channel] = []
     end
 end

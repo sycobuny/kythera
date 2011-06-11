@@ -39,25 +39,23 @@ require 'kythera/service'
 require 'kythera/uplink'
 require 'kythera/user'
 
-# I know globals are evil etc. but this is just plain easier
-$config = Object.new
-$eventq = nil
-
-class << $config
-    # Adds methods to the parser from an arbitrary module
-    #
-    # @param [Module] mod the module containing methods to add
-    #
-    def use(mod)
-        $config.extend(mod)
-    end
-end
-
 # Starts the parsing of the configuraiton DSL
 #
 # @param [Proc] block contains the actual configuration code
 #
 def configure(&block)
+    $config = Object.new
+
+    class << $config
+        # Adds methods to the parser from an arbitrary module
+        #
+        # @param [Module] mod the module containing methods to add
+        #
+        def use(mod)
+            $config.extend(mod)
+        end
+    end
+
     # The configuration magic begins here...
     $config.instance_eval &block
 

@@ -16,6 +16,7 @@ module Loggable
     class NilLogger
         include Singleton
 
+        # Just do nothing
         def method_missing(name, *args)
         end
     end
