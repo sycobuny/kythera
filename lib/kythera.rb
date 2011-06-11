@@ -39,6 +39,11 @@ require 'kythera/service'
 require 'kythera/uplink'
 require 'kythera/user'
 
+# Require all of our services and extensions
+Dir.glob(['lib/kythera/service/*.rb', 'ext/*rb']) do |filepath|
+    require filepath.split(File::SEPARATOR, 2)[-1]
+end
+
 # Starts the parsing of the configuraiton DSL
 #
 # @param [Proc] block contains the actual configuration code

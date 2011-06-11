@@ -14,12 +14,15 @@ require 'kythera'
 class Service
     include Loggable
 
-    # A list of all services
+    # A list of all services classes
+    @@services_classes = []
+
+    # A list of all instantiated services
     @@services = []
 
     # Attribute reader for `@@services`
     #
-    # @return [Hash] a list of all services
+    # @return [Array] a list of all services
     #
     def self.services
         @@services
@@ -30,12 +33,22 @@ class Service
     # @param [Class] klass the class that subclasses us
     #
     def self.inherited(klass)
-        @@services << klass
+        @@services_classes << klass
+    end
+
+    # Instantiate all of our services
+    #
+    # @param [Uplink] uplink the Uplink to pass to the services
+    # @param [Logger] logger the logger to pass to the services
+    #
+    def self.instantiate(uplink, logger)
+        @@services_classes.each { |srv| @@services << srv.new(uplink, logger) }
     end
 
     # This should never be called except from a subclass, and only exists
     # as a guide for arguments.
-    def initialize(logger)
+    def initialize(uplink, logger)
+        @uplink = uplink
         @logger = nil
 
         self.logger = logger
@@ -43,6 +56,6 @@ class Service
 
     # You must override this or your service doesn't do too much huh?
     def irc_privmsg(user, params)
-        log.error "I'm a service that didn't override irc_privmsg!"
+        log.error "I'm a Service that didn't override irc_privmsg!"
     end
 end

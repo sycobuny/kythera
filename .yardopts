@@ -1,0 +1,5 @@
+--output yardoc/
+-
+doc/events.md
+doc/extensions.md
+doc/license.txt

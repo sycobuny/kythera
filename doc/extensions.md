@@ -3,19 +3,24 @@
     Copyright (c) 2011 Eric Will <rakaur@malkier.net>
     Rights to this code are documented in LICENSE
 
-Services Interface
-==================
+Extensions Interface
+====================
 
-All files matching `lib/kythera/service/*.rb` are loaded. The a good structure
-would be:
+All files matching `lib/kythera/service/*.rb` and `ext/*.rb` are autoloaded.
+A good structure would be:
 
   * `lib/kythera/service/chanserv.rb`
     * `lib/kythera/service/chanserv/file1.rb`
     * `lib/kythera/service/chanserv/file2.rb`
+  * `ext/my_extension.rb`
+    * `ext/my_extension/file1.rb`
+    * `ext/my_extension/file2.rb`
 
 Since your code is executed upon load, most things are taken care of
 automatically. So long as your service subclasses `Service`, your class will
 be registered and automatically instantiated at the proper time:
+
+    require 'kythera'
 
     class ChanServ < Service
         # ...
@@ -25,14 +30,19 @@ Just by doing this your class is registered and will be instantiated. It is
 your responsibility to provide certain methods in your class that the
 application will utilize to introduce your clients and to send events your way:
 
+    require 'kythera'
+
     class ChanServ < Service
-        # Your service is always initialized with a logger
-        def initialize(logger)
+        # Your service is always initialized with the uplink and a logger
+        def initialize(uplink, logger)
             # Calling `super` sets up the logger, and you don't have to
             # do anything else with it. The logger works as:
             #   log.info 'hello...'
             #   log.debug 'hello...'
-            # etc.
+            #
+            # Calling this also sets `@uplink` to the argument provided.
+            # The uplink contains the methods you'll use to communicate
+            # with the IRC server.
             #
             super
 
@@ -40,6 +50,9 @@ application will utilize to introduce your clients and to send events your way:
             # your class will have an interface for receiving PRIVMSG sent to it
             # so that you don't have to parse _all_ PRIVMSGs.
             $eventq.handle(:some_event) { my_handler }
+
+            # You should also introduce your clients to the uplink here:
+            @uplink.introduce_user(XXX)
         end
 
         # You must provide a method that returns your service's nickname

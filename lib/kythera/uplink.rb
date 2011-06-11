@@ -29,10 +29,13 @@ class Uplink
 
         self.logger = logger
 
+        # Set up some event handlers
         $eventq.handle(:socket_readable) { read  }
         $eventq.handle(:socket_writable) { write }
-        $eventq.handle(:connected)       { send_handshake }
         $eventq.handle(:recvq_ready)     { parse }
+
+        $eventq.handle(:connected) { send_handshake }
+        $eventq.handle(:connected) { Service.instantiate(self, @logger) }
 
         # Include the methods for the protocol we're using
         extend Protocol
@@ -89,7 +92,7 @@ class Uplink
         if bool
             log.info "lost connection to #{@config.name}:#{@config.port}"
 
-            $eventq.post :disconnected
+            $eventq.post(:disconnected)
 
             @socket.close if @socket
             @recvq.clear
@@ -115,7 +118,7 @@ class Uplink
 
             @connected = true
 
-            $eventq.post :connected
+            $eventq.post(:connected)
         end
     end
 

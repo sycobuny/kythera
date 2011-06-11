@@ -71,11 +71,7 @@ class Kythera
         # Time to fork...
         if willfork
             daemonize(wd)
-
-            if logging
-                Dir.mkdir 'var' unless File.exists? 'var'
-                self.logger = Logger.new('var/kythera.log', 'weekly')
-            end
+            self.logger = Logger.new('var/kythera.log', 'weekly') if logging
         else
             puts "#{ME}: pid #{Process.pid}"
             puts "#{ME}: running in foreground mode from #{wd}"
@@ -87,7 +83,6 @@ class Kythera
         self.log_level = $config.me.logging if logging
 
         # Write a pid file
-        Dir.mkdir 'var' unless File.exists? 'var'
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
 
         # Enter the main event loop

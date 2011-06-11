@@ -6,7 +6,9 @@
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
 # Rights to this code are documented in LICENSE
 #
+
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
+$LOAD_PATH.unshift File.expand_path('../ext', File.dirname(__FILE__))
 
 require 'kythera'
 
