@@ -3,15 +3,17 @@
 # lib/kythera/service/shrike/configuration.rb: implements configuration DSL
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
-# Rights to this code are documented in LICENSE
+# Rights to this code are documented in doc/license.txt
 #
 
 require 'kythera'
 
+# This is extended into $config
 module Shrike::Configuration
     # This will be $config.shrike
     attr_reader :shrike
 
+    # Implements the 'shrike_service' portion of the config
     def shrike_service(&block)
         return if @shrike
 
@@ -22,6 +24,7 @@ module Shrike::Configuration
     end
 end
 
+# Contains the methods that do the config parsing
 module Shrike::Configuration::Methods
     # Adds methods to the parser from an arbitrary module
     #

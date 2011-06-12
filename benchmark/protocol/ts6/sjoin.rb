@@ -3,7 +3,7 @@
 # benchmark/protocol/ts6/sjoin.rb: benchmark channel introductions
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
-# Rights to this code are documented in LICENSE
+# Rights to this code are documented in doc/license.txt
 #
 
 $LOAD_PATH.unshift File.expand_path('../../../lib', File.dirname(__FILE__))

@@ -3,7 +3,7 @@
 # lib/kythera/protocol/ts6/user.rb: TS6-specific User class
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
-# Rights to this code are documented in LICENSE
+# Rights to this code are documented in doc/license.txt
 #
 
 require 'kythera'

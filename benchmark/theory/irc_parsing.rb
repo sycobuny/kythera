@@ -3,7 +3,7 @@
 # benchmark/theory/irc_parsing.rb: different methods of parsing IRC
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
-# Rights to this code are documented in LICENSE
+# Rights to this code are documented in doc/license.txt
 #
 
 require 'rubygems'
