@@ -51,12 +51,17 @@ application will utilize to introduce your clients and to send events your way:
             # so that you don't have to parse _all_ PRIVMSGs.
             $eventq.handle(:some_event) { my_handler }
 
-            # You should also introduce your clients to the uplink here:
-            @uplink.introduce_user(XXX)
+            # You should also introduce your clients to the uplink here. This
+            # method returns your User object.
+            @user = @uplink.introduce_user(nick, username, hostname, realname)
         end
 
-        # You must provide a method that returns your service's nickname
-        attr_reader :nickname
+        public
+
+        # You must provide a few methods so that Kythera can get at some of
+        # your service's information. We need access to your User and your
+        # configuration object, which must have a 'nickname' attribute.
+        attr_reader :config, :user
 
         # You must provide a method that handles PRIVMSG sent your nickname
         def irc_privmsg(user, params)
@@ -71,6 +76,9 @@ application will utilize to introduce your clients and to send events your way:
 
 So there's your service. That's all you have to do to get started, everything
 else (handling the PRIVMSG) is up to you.
+
+If you need help writing a configuration portion, for now take a look at
+`lib/kythera/service/shrike/configuration.rb`. I'll try to write it up later on.
 
 Since this isn't anywhere near a finished product yet, this is likely to
 massively change. At the very least I plan to add methods similar to the

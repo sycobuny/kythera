@@ -14,6 +14,21 @@ require 'kythera/protocol/ts6/user'
 
 # Implements TS6 protocol-specific methods
 module Protocol::TS6
+    @@current_uid = 'AAAAAA'
+
+    public
+
+    # Introduces a pseudo-client to the network
+    #
+    # @param [String] nick user's nickname
+    # @param [String] user user's username
+    # @param [String] host user's hostname
+    # @param [String] real user's realname / gecos
+    #
+    def introduce_user(nick, user, host, real)
+        return send_uid(nick, user, host, real)
+    end
+
     private
 
     ###########
@@ -65,9 +80,25 @@ module Protocol::TS6
         @sendq << "SVINFO 6 6 0 :#{Time.now.to_i}"
     end
 
-    # :<SID> PONG <NAME> :<PARAM>
+    # PONG <NAME> :<PARAM>
     def send_pong(param)
-        @sendq << ":#{@config.sid} PONG #{$config.me.name} :#{param}"
+        @sendq << "PONG #{$config.me.name} :#{param}"
+    end
+
+    # UID <NICK> 1 <TS> +<UMODES> <USER> <HOST> <IP> <UID> :<REAL>
+    def send_uid(nick, uname, host, real)
+        ts  = Time.now.to_i
+        ip  = @config.bind_host || '255.255.255.255'
+        id  = @@current_uid
+        uid = "#{@config.sid}#{id}"
+
+        @@current_uid.next!
+
+        user = User.new(nil, nick, uname, host, ip, real, uid, ts, @logger)
+
+        @sendq << "UID #{nick} 1 #{ts} + #{uname} #{host} #{ip} #{uid} :#{real}"
+
+        return user
     end
 
     #####################
@@ -383,5 +414,20 @@ module Protocol::TS6
         modes  = params.delete_at(0)
 
         channel.parse_modes(modes, params)
+    end
+
+    # Handles an incoming PRIVMSG
+    #
+    # parv[0] -> target
+    # parv[1] -> message
+    #
+    def irc_privmsg(m)
+        user = User.users[m.origin]
+
+        # Which one of our clients was it sent to?
+        not_used, srv = Service.services.find { |k, v| v.user.uid == m.parv[0] }
+
+        # Send it to the service
+        srv.send(:irc_privmsg, user, m.parv[1].split(' '))
     end
 end

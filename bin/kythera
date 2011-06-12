@@ -38,6 +38,7 @@ Dir.chdir File.expand_path('..', File.dirname(__FILE__))
 # The actual configuration begins here
 configure do
     use Kythera::Configuration # The base configuration options
+    use Shrike::Configuration  # The Shrike service's configuration options
 
     # This section of the configuration is dedicated to the general
     # behavior of the service as a whole.
@@ -79,7 +80,6 @@ configure do
     # You can have as many of these as you like.
     #
     uplink 'moridin.ericw.org', 6699 do
-
         # How important is this uplink vs other uplinks? Can be anything
         # Can be any number, positive or negative. If missing, it's
         # assumed to be zero.
@@ -128,10 +128,9 @@ configure do
     # Still reading... :)
     # XXX abort "You really should read ALL of your configuration file!"
 
-    # This section of the configuration describes the behavior of the username
-    # service. If it is not specified or is empty, userserv is disabled.
-    userserv do
-
+    # This section of the configuration describes the behavior of the Shrike
+    # service. If it is not specified or is empty, shrike is disabled.
+    shrike_service do
         # The client's nickname on IRC
         nickname :X
 
@@ -145,6 +144,6 @@ configure do
         realname 'kythera irc services'
 
         # The maximum number of usernames registered to a single email address
-        max 5;
+        #max 5;
     end
 end

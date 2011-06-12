@@ -62,7 +62,7 @@ def configure(&block)
     end
 
     # The configuration magic begins here...
-    $config.instance_eval &block
+    $config.instance_eval(&block)
 
     # Make sure the configuration information is valid
     Kythera.verify_configuration
@@ -97,15 +97,11 @@ end
 
 # Contains the methods that actually implement the configuration
 module Kythera::Configuration
-
     # Holds the settings for the daemon section
     attr_reader :me
 
     # Holds the settings for the uplink section
     attr_reader :uplinks
-
-    # Holds the settings for the userserv section
-    attr_reader :user_service
 
     # Parses the `daemon` section of the configuration
     #
@@ -116,7 +112,7 @@ module Kythera::Configuration
 
         @me = OpenStruct.new
         @me.extend Kythera::Configuration::Daemon
-        @me.instance_eval &block
+        @me.instance_eval(&block)
     end
 
     # Parses the `uplink` section of the configuration
@@ -130,21 +126,9 @@ module Kythera::Configuration
         ul.port = port
 
         ul.extend Kythera::Configuration::Uplink
-        ul.instance_eval &block
+        ul.instance_eval(&block)
 
         (@uplinks ||= []) << ul
-    end
-
-    # Parses the `userserv` section of the configuration
-    #
-    # @param [Proc] block contains the actual configuraiton code
-    #
-    def userserv(&block)
-        return if @user_service
-
-        @user_service = OpenStruct.new
-        @user_service.extend Kythera::Configuration::UserServ
-        @user_service.instance_eval &block
     end
 end
 
@@ -163,7 +147,6 @@ end
 # Directly reopening this module is possible, but not advisable.
 #
 module Kythera::Configuration::Daemon
-
     # Adds methods to the parser from an arbitrary module
     #
     # @param [Module] mod the module containing methods to add
@@ -221,7 +204,6 @@ end
 # you should only need to use `use` once.
 #
 module Kythera::Configuration::Uplink
-
     # Adds methods to the parser from an arbitrary module
     #
     # @param [Module] mod the module containing methods to add
@@ -278,52 +260,5 @@ module Kythera::Configuration::Uplink
 
     def casemapping(mapping)
         self.casemapping = mapping
-    end
-end
-
-# Implements the userserv section of the configuration
-#
-# If you're writing an extension that needs to add settings here,
-# you should provide your own via `use`.
-#
-# @example Extend the userserv settings
-#     userserv do
-#         use MyExtension::Configuration::UserServ
-#
-#         # ...
-#     end
-#
-# Directly reopening this module is possible, but not advisable.
-#
-module Kythera::Configuration::UserServ
-
-    # Adds methods to the parser from an arbitrary module
-    #
-    # @param [Module] mod the module containing methods to add
-    #
-    def use(mod)
-        self.extend(mod)
-    end
-
-    private
-
-    def nickname(nick)
-        self.nickname = nick
-    end
-
-    def username(user)
-        self.username = user
-    end
-
-    def hostname(host)
-        self.hostname = host
-    end
-
-    def realname(gecos)
-        self.realname = gecos
-    end
-
-    def max(maxu)
-        self.max = maxu
     end
 end
