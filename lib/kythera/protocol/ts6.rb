@@ -29,6 +29,26 @@ module Protocol::TS6
         return send_uid(nick, user, host, real)
     end
 
+    # Sends a PRIVMSG to a user
+    #
+    # @param [User] origin the user that's sending the message
+    # @param [User] user the User to send the message to
+    # @param [String] message the message to send
+    #
+    def privmsg(origin, user, message)
+        send_privmsg(origin.uid, user.uid, message)
+    end
+
+    # Sends a NOTICE to a user
+    #
+    # @param [User] origin the user that's sending the notice
+    # @param [User] user the User to send the notice to
+    # @param [String] message the message to send
+    #
+    def notice(origin, user, message)
+        send_notice(origin.uid, user.uid, message)
+    end
+
     private
 
     ###########
@@ -99,6 +119,16 @@ module Protocol::TS6
         @sendq << "UID #{nick} 1 #{ts} + #{uname} #{host} #{ip} #{uid} :#{real}"
 
         return user
+    end
+
+    # :UID PRIVMSG <TARGET_UID> :<MESSAGE>
+    def send_privmsg(origin, target, message)
+        @sendq << ":#{origin} PRIVMSG #{target} :#{message}"
+    end
+
+    # :UID NOTICE <TARGET_UID> :<MESSAGE>
+    def send_notice(origin, target, message)
+        @sendq << ":#{origin} NOTICE #{target} :#{message}"
     end
 
     #####################
