@@ -45,12 +45,36 @@ class Shrike < Service
         # Introduce our client to the network
         @user = @uplink.introduce_user(@config.nickname, @config.username,
                                        @config.hostname, @config.realname)
+
+        # Join our configuration channel
+        $eventq.handle(:end_of_burst) do
+            @uplink.join(@user, @config.channel)
+        end if @config.channel
     end
 
     public
 
     def irc_privmsg(user, params)
-        log.debug "shrike got PRIVMSG but I'm lazy for now: #{params.inspect}"
+        cmd = params.delete_at(0)
+        cmd = "do_#{cmd}".downcase.to_sym
+
+        self.send(cmd, user, params) if self.respond_to?(cmd, true)
+    end
+
+    private
+
+    # This is dangerous, and is only here for my testing purposes - XXX
+    def do_raw(user, params)
+        @uplink.raw(params.join(' '))
+    end
+
+    # Extremely dangerous, this is here only for my testing purposes! - XXX
+    def do_eval(user, params)
+        code = params.join(' ')
+
+        result = eval(code)
+
+        @uplink.privmsg(@user, @config.channel, "#{result.inspect}")
     end
 end
 

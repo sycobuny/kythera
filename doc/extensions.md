@@ -60,7 +60,7 @@ application will utilize to introduce your clients and to send events your way:
 
         # You must provide a few methods so that Kythera can get at some of
         # your service's information. We need access to your User and your
-        # configuration object, which must have a 'nickname' attribute.
+        # configuration object.
         attr_reader :config, :user
 
         # You must provide a method that handles PRIVMSG sent your nickname

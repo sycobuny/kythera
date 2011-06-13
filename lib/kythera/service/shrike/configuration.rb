@@ -51,4 +51,8 @@ module Shrike::Configuration::Methods
     def realname(real)
         self.realname = real
     end
+
+    def channel(chan)
+        self.channel = chan
+    end
 end

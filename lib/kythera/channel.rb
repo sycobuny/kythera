@@ -102,11 +102,11 @@ class Channel
             end
 
             # Status modes
-            if STATUS_MODES.include? c
+            if STATUS_MODES.include?(c)
                 mode  = STATUS_MODES[c]
                 param = params.shift
 
-            elsif LIST_MODES.include? c
+            elsif LIST_MODES.include?(c)
                 mode  = LIST_MODES[c]
                 param = params.shift
 
@@ -123,12 +123,12 @@ class Channel
                 @limit = action == :add ? param : 0
 
             # The rest, no param
-            elsif BOOL_MODES.include? c
+            elsif BOOL_MODES.include?(c)
                 mode = BOOL_MODES[c]
             end
 
             # Add boolean modes to the channel's modes
-            unless STATUS_MODES.include? c or LIST_MODES.include? c
+            unless STATUS_MODES.include?(c) or LIST_MODES.include?(c)
                 if action == :add
                     @modes << mode
                 else
@@ -136,7 +136,7 @@ class Channel
                 end
             end
 
-            unless STATUS_MODES.include? c
+            unless STATUS_MODES.include?(c)
                 log.debug "mode #{action}ed: #{self} -> #{mode} #{param}"
             end
 
@@ -145,7 +145,7 @@ class Channel
             # Status modes for users get tossed to another method so that
             # how they work can be monkeypatched by protocol modules
             #
-            parse_status_mode(action, mode, param) if STATUS_MODES.include? c
+            parse_status_mode(action, mode, param) if STATUS_MODES.include?(c)
 
             # Post an event for it
             if action == :add

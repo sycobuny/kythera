@@ -165,7 +165,7 @@ class Kythera
             Encoding.default_external = 'UTF-8'
         end
 
-        if defined? RUBY_ENGINE and RUBY_ENGINE != 'rbx'
+        if defined?(RUBY_ENGINE) and RUBY_ENGINE != 'rbx'
             puts "#{ME}: runs best on Rubinius (http://rubini.us/)"
         end
     end

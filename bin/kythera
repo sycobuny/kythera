@@ -143,6 +143,11 @@ configure do
         # The client's realname (sometimes called gecos) on IRC
         realname 'kythera irc services'
 
+        # The channel the client joins and sends certain messages to
+        #
+        # Comment to disable
+        channel '#kythera'
+
         # The maximum number of usernames registered to a single email address
         #max 5;
     end

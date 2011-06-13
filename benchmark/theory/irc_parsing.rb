@@ -45,7 +45,7 @@ def parse_line(recvq)
             origin = nil
         end
 
-        tokens, args = line.split(' :')
+        tokens, args = line.split(' :', 2)
         parv = tokens.split(' ')
         cmd  = parv.delete_at(0)
         parv << args

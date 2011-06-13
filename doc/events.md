@@ -31,6 +31,11 @@ List of Events
     * params:
       * _none_
 
+  * end\_of\_burst
+    * the service has finished processing the connection burst
+    * params:
+      * A Float containing the time it took to process the burst
+
   * irc\_*
     * any command received by the uplink is posted as irc\_[command]
       * e.g.: PRIVMSG = irc_privmsg

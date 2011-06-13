@@ -35,7 +35,12 @@ class Uplink
         $eventq.handle(:recvq_ready)     { parse }
 
         $eventq.handle(:connected) { send_handshake }
+        $eventq.handle(:connected) { $config.me.bursting = Time.now }
         $eventq.handle(:connected) { Service.instantiate(self, @logger) }
+
+        $eventq.handle(:end_of_burst) do |delta|
+            log.info "finished synching to network in #{delta}s"
+        end
 
         # Include the methods for the protocol we're using
         extend Protocol
@@ -194,7 +199,7 @@ class Uplink
                 origin = nil
             end
 
-            tokens, args = line.split(' :')
+            tokens, args = line.split(' :', 2)
             parv = tokens.split(RE_SPACE)
             cmd  = parv.delete_at(0)
             parv << args

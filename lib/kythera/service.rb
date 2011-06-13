@@ -17,8 +17,8 @@ class Service
     # A list of all services classes
     @@services_classes = []
 
-    # A list of all instantiated services (keyed by nickname)
-    @@services = {}
+    # A list of all instantiated services
+    @@services = []
 
     # Attribute reader for `@@services`
     #
@@ -46,7 +46,7 @@ class Service
             next if srv.disabled?
 
             s = srv.new(uplink, logger)
-            @@services[s.config.nickname] = s
+            @@services << s
         end
     end
 
@@ -58,6 +58,8 @@ class Service
 
         self.logger = logger
     end
+
+    private
 
     # You must override this or your service doesn't do too much huh?
     def irc_privmsg(user, params)
