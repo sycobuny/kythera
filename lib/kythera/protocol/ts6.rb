@@ -142,12 +142,12 @@ module Protocol::TS6
     # parv[2] -> ts version
     # parv[3] -> sid of remote server
     #
-    def irc_pass(m)
-        if m.parv[0] != @config.receive_password.to_s
+    def irc_pass(origin, parv)
+        if parv[0] != @config.receive_password.to_s
             log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
         else
-            Server.new(m.parv[3], @logger)
+            Server.new(parv[3], @logger)
         end
     end
 
@@ -157,14 +157,14 @@ module Protocol::TS6
     # parv[1] -> hops
     # parv[2] -> server description
     #
-    def irc_server(m)
-        if m.origin
+    def irc_server(origin, parv)
+        if origin
             # If we have an origin, then this is a new server introduction.
             # However this is a TS5 introduction, and we only support TS6-only
             # networks, so spit out a warning and ignore it.
             #
             log.warn 'got non-TS6 server introduction on TS6-only network:'
-            log.warn "#{m.parv[0]} (#{m.parv[2]})"
+            log.warn "#{parv[0]} (#{parv[2]})"
 
             return
         end
@@ -173,19 +173,19 @@ module Protocol::TS6
         not_used, server = Server.servers.first
 
         # Make sure their name matches what we expect
-        unless m.parv[0] == @config.name
+        unless parv[0] == @config.name
             log.error "name mismatch from uplink"
-            log.error "#{m.parv[0]} != #{@config.name}"
+            log.error "#{parv[0]} != #{@config.name}"
 
             self.dead = true
 
             return
         end
 
-        server.name        = m.parv[0]
-        server.description = m.parv[2]
+        server.name        = parv[0]
+        server.description = parv[2]
 
-        log.debug "new server: #{m.parv[0]}"
+        log.debug "new server: #{parv[0]}"
 
         $eventq.post(:server_added, server)
     end
@@ -197,18 +197,18 @@ module Protocol::TS6
     # parv[2] -> '0'
     # parv[3] -> current ts
     #
-    def irc_svinfo(m)
-        ts_delta = m.parv[3].to_i - Time.now.to_i
+    def irc_svinfo(origin, parv)
+        ts_delta = parv[3].to_i - Time.now.to_i
 
-        if m.parv[0].to_i < 6
+        if parv[0].to_i < 6
             log.error "#{@config.name} doesn't support TS6"
             self.dead = true
         elsif ts_delta >= 60
             log.warn "#{@config.name} has excessive TS delta"
-            log.warn "#{m.parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            log.warn "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
         elsif ts_delta >= 300
             log.error "#{@config.name} TS delta exceeds five minutes"
-            log.error "#{m.parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            log.error "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
             self.dead = true
         end
     end
@@ -217,8 +217,8 @@ module Protocol::TS6
     #
     # parv[0] -> sid of remote server
     #
-    def irc_ping(m)
-        send_pong(m.parv[0])
+    def irc_ping(origin, parv)
+        send_pong(parv[0])
     end
 
     # Handles an incoming SID (server introduction)
@@ -228,10 +228,10 @@ module Protocol::TS6
     # parv[2] -> sid
     # parv[3] -> description
     #
-    def irc_sid(m)
-        server             = Server.new(m.parv[2], @logger)
-        server.name        = m.parv[0]
-        server.description = m.parv[3]
+    def irc_sid(origin, parv)
+        server             = Server.new(parv[2], @logger)
+        server.name        = parv[0]
+        server.description = parv[3]
 
         $eventq.post(:server_added, server)
     end
@@ -241,16 +241,16 @@ module Protocol::TS6
     # parv[0] -> SID leaving
     # parv[1] -> server's uplink's name
     #
-    def irc_squit(m)
-        unless server = Server.servers.delete(m.parv[0])
-            log.error "received SQUIT for unknown SID: #{m.parv[0]}"
+    def irc_squit(origin, parv)
+        unless server = Server.servers.delete(parv[0])
+            log.error "received SQUIT for unknown SID: #{parv[0]}"
             return
         end
 
         # Remove all their users to comply with CAPAB QS
         server.users.each { |u| User.users.delete u.uid }
 
-        log.debug "server leaving: #{m.parv[0]}"
+        log.debug "server leaving: #{parv[0]}"
     end
 
     # Handles an incoming UID (user introduction)
@@ -265,15 +265,15 @@ module Protocol::TS6
     # parv[7] -> uid
     # parv[8] -> realname
     #
-    def irc_uid(m)
-        p = m.parv
+    def irc_uid(origin, parv)
+        p = parv
 
-        unless s = Server.servers[m.origin]
-            log.error "got UID from unknown SID: #{m.origin}"
+        unless s = Server.servers[origin]
+            log.error "got UID from unknown SID: #{origin}"
             return
         end
 
-        m = m.parv[3][1 .. -1]
+        m = parv[3][1 .. -1]
 
         u = User.new(s, p[0], p[4], p[5], p[6], p[8], m, p[7], p[2], @logger)
 
@@ -284,9 +284,9 @@ module Protocol::TS6
     #
     # parv[0] -> quit message
     #
-    def irc_quit(m)
-        unless user = User.users.delete(m.origin)
-            log.error "received QUIT for unknown UID: #{m.origin}"
+    def irc_quit(origin, parv)
+        unless user = User.users.delete(origin)
+            log.error "received QUIT for unknown UID: #{origin}"
             return
         end
 
@@ -309,11 +309,11 @@ module Protocol::TS6
     # parv... -> cmode params (if any)
     # parv[-1] -> members as UIDs
     #
-    def irc_sjoin(m)
-        their_ts = m.parv[0].to_i
+    def irc_sjoin(origin, parv)
+        their_ts = parv[0].to_i
 
         # Do we already have this channel?
-        if channel = Channel.channels[m.parv[1]]
+        if channel = Channel.channels[parv[1]]
             if their_ts < channel.timestamp
                 # Remove our status modes, channel modes, and bans
                 channel.members.each { |u| u.clear_status_modes(channel) }
@@ -321,12 +321,12 @@ module Protocol::TS6
                 channel.timestamp = their_ts
             end
         else
-            channel = Channel.new(m.parv[1], m.parv[0], @logger)
+            channel = Channel.new(parv[1], parv[0], @logger)
         end
 
         # Parse channel modes
         if their_ts <= channel.timestamp
-            modes_and_params = m.parv[GET_MODES_PARAMS]
+            modes_and_params = parv[GET_MODES_PARAMS]
             modes  = modes_and_params[0]
             params = modes_and_params[REMOVE_FIRST]
 
@@ -334,7 +334,7 @@ module Protocol::TS6
         end
 
         # Parse the members list
-        members = m.parv[-1].split(' ')
+        members = parv[-1].split(' ')
 
         # This particular process was benchmarked, and this is the fastest
         # See benchmark/theory/multiprefix_parsing.rb
@@ -386,15 +386,15 @@ module Protocol::TS6
     # parv[1] -> channel name
     # parv[2] -> '+'
     #
-    def irc_join(m)
-        user, channel = find_user_and_channel(m.origin, m.parv[1], :JOIN)
+    def irc_join(origin, parv)
+        user, channel = find_user_and_channel(origin, parv[1], :JOIN)
         return unless user and channel
 
-       if m.parv[0].to_i < channel.timestamp
+       if parv[0].to_i < channel.timestamp
            # Remove our status modes, channel modes, and bans
            channel.members.each { |u| u.clear_status_modes(channel) }
            channel.clear_modes
-           channel.timestamp = m.parv[0].to_i
+           channel.timestamp = parv[0].to_i
        end
 
        # Add them to the channel
@@ -405,8 +405,8 @@ module Protocol::TS6
     #
     # parv[0] -> channel name
     #
-    def irc_part(m)
-        user, channel = find_user_and_channel(m.origin, m.parv[0], :PART)
+    def irc_part(origin, parv)
+        user, channel = find_user_and_channel(origin, parv[0], :PART)
 
         return unless user and channel
 
@@ -419,8 +419,8 @@ module Protocol::TS6
     # parv[1] -> UID of kicked user
     # parv[2] -> kick reason
     #
-    def irc_kick(m)
-        user, channel = find_user_and_channel(m.parv[1], m.parv[0], :KICK)
+    def irc_kick(origin, parv)
+        user, channel = find_user_and_channel(parv[1], parv[0], :KICK)
 
         return unless user and channel
 
@@ -433,16 +433,16 @@ module Protocol::TS6
     # parv[1] -> channel name
     # parv[2] -> mode string
     #
-    def irc_tmode(m)
-        if m.origin.length == 3
-            user, channel = find_user_and_channel(m.origin, m.parv[1], :TMODE)
+    def irc_tmode(origin, parv)
+        if origin.length == 3
+            user, channel = find_user_and_channel(origin, parv[1], :TMODE)
             return unless user and channel
         else
-            channel = Channel.channels[m.parv[1]]
+            channel = Channel.channels[parv[1]]
             return unless channel
         end
 
-        params = m.parv[GET_MODES_PARAMS]
+        params = parv[GET_MODES_PARAMS]
         modes  = params.delete_at(0)
 
         channel.parse_modes(modes, params)
@@ -453,13 +453,13 @@ module Protocol::TS6
     # parv[0] -> target
     # parv[1] -> message
     #
-    def irc_privmsg(m)
-        user = User.users[m.origin]
+    def irc_privmsg(origin, parv)
+        user = User.users[origin]
 
         # Which one of our clients was it sent to?
-        not_used, srv = Service.services.find { |k, v| v.user.uid == m.parv[0] }
+        not_used, srv = Service.services.find { |k, v| v.user.uid == parv[0] }
 
         # Send it to the service
-        srv.send(:irc_privmsg, user, m.parv[1].split(' '))
+        srv.send(:irc_privmsg, user, parv[1].split(' '))
     end
 end

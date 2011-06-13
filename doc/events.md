@@ -36,7 +36,8 @@ List of Events
       * e.g.: PRIVMSG = irc_privmsg
       * e.g.: PING = irc_ping
       * params:
-        * A `Message` object
+        * the origin, usually a server, nick!user@host, or protocol-specific ID
+        * parv, an Array of space-tokenized paramaters after the IRC command
 
   * server_added
     * a server has joined the network

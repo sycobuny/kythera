@@ -199,19 +199,17 @@ class Uplink
             cmd  = parv.delete_at(0)
             parv << args
 
-            m = Message.new(origin, parv, raw)
-
             cmd = "irc_#{cmd.downcase}".to_sym
 
             # Call the protocol-specific handler
             if self.respond_to?(cmd, true)
-                self.send(cmd, m)
+                self.send(cmd, origin, parv)
             else
                 log.warn "no protocol handler for #{cmd.upcase}"
             end
 
             # Fire off an event for extensions, etc
-            $eventq.post(cmd, m)
+            $eventq.post(cmd, origin, parv)
         end
     end
 end
