@@ -42,12 +42,13 @@ class User
     attr_reader :status_modes
 
     # Creates a new user. Should be patched by the protocol module.
-    def initialize(server, nick, user, host, real, logger)
+    def initialize(server, nick, user, host, real, umodes, logger)
         @server   = server
         @nickname = nick
         @username = user
         @hostname = host
         @realname = real
+        @modes    = umodes
         @logger   = nil
 
         @status_modes = {}
@@ -57,6 +58,14 @@ class User
     end
 
     public
+
+    # Is this user an IRC operator?
+    #
+    # @return [Boolean] true or false
+    #
+    def operator?
+        @modes.include?('o')
+    end
 
     # Adds a status mode for this user on a particular channel
     #

@@ -94,7 +94,7 @@ module Protocol::TS6
 
         @@current_uid.next!
 
-        user = User.new(nil, nick, uname, host, ip, real, uid, ts, @logger)
+        user = User.new(nil, nick, uname, host, ip, real, nil, uid, ts, @logger)
 
         @sendq << "UID #{nick} 1 #{ts} + #{uname} #{host} #{ip} #{uid} :#{real}"
 
@@ -238,14 +238,16 @@ module Protocol::TS6
     def irc_uid(m)
         p = m.parv
 
-        unless server = Server.servers[m.origin]
+        unless s = Server.servers[m.origin]
             log.error "got UID from unknown SID: #{m.origin}"
             return
         end
 
-        u = User.new(server, p[0], p[4], p[5], p[6], p[8], p[7], p[2], @logger)
+        m = m.parv[3][1 .. -1]
 
-        server.add_user(u)
+        u = User.new(s, p[0], p[4], p[5], p[6], p[8], m, p[7], p[2], @logger)
+
+        s.add_user(u)
     end
 
     # Handles an incoming QUIT

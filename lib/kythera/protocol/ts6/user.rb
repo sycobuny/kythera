@@ -20,13 +20,14 @@ class User
     attr_reader :uid
 
     # Creates a new user and adds it to the list keyed by UID
-    def initialize(server, nick, user, host, ip, real, uid, ts, logger)
+    def initialize(server, nick, user, host, ip, real, umodes, uid, ts, logger)
         @server    = server
         @nickname  = nick
         @username  = user
         @hostname  = host
         @ip        = ip
         @realname  = real
+        @modes     = umodes
         @uid       = uid
         @timestamp = ts
         @logger    = nil
