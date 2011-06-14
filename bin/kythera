@@ -92,7 +92,7 @@ configure do
         # If you need to bind to a specific IP when connecting to the
         # uplink specify it here. You can also specify a local port.
         #
-        bind '204.152.222.180'
+        #bind '204.152.222.180'
         #bind '10.0.1.30', 55101
 
         # The password we send to the uplink upon connection.

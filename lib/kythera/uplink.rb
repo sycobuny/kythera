@@ -127,6 +127,8 @@ class Uplink
         end
     end
 
+    CR_OR_LF = /\r|\n/
+
     # Reads waiting data from the socket and stores each "line" in the recvq
     def read
         begin
@@ -148,14 +150,14 @@ class Uplink
             line = line[0]
 
             # If the last line had no \n, add this one onto it.
-            if @recvq[-1] and @recvq[-1][-1].chr != "\n"
+            if @recvq[-1] and @recvq[-1][-1].chr !~ CR_OR_LF
                 @recvq[-1] += line
             else
                 @recvq << line
             end
         end
 
-        $eventq.post :recvq_ready if @recvq[-1] and @recvq[-1][-1].chr == "\n"
+        $eventq.post(:recvq_ready) if @recvq[-1] and @recvq[-1][-1].chr == "\n"
     end
 
     # Writes the each "line" in the sendq to the socket
@@ -187,7 +189,7 @@ class Uplink
     # Parses incoming IRC data and sends it off to protocol-specific handlers
     def parse
         while line = @recvq.shift
-            raw = line.chomp!
+            line.chomp!
 
             log.debug "-> #{line}"
 
@@ -210,7 +212,7 @@ class Uplink
             if self.respond_to?(cmd, true)
                 self.send(cmd, origin, parv)
             else
-                log.warn "no protocol handler for #{cmd.upcase}"
+                log.warn "no protocol handler for #{cmd.to_s.upcase}"
             end
 
             # Fire off an event for extensions, etc

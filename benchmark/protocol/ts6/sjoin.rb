@@ -15,15 +15,15 @@ require 'benchmark/ips'
 require 'logger'
 require 'ostruct'
 
-$eventq = EventQueue.new Logger.new($stdout)
-$eventq.log_level = :fatal
+$logger = Logger.new($stdout)
+$logger.level = Logger::FATAL
+
+$eventq = EventQueue.new($logger)
 
 config = OpenStruct.new
 config.protocol = :ts6
 
-ul = Uplink.new(config)
-ul.logger = Logger.new($stdout)
-ul.log_level = :fatal
+ul = Uplink.new(config, $logger)
 
 class << ul
     attr_reader :recvq
