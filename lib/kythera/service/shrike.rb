@@ -25,8 +25,12 @@ class Shrike < Service
     attr_reader :config, :user
 
     # Is this service enabled in the configuration?
-    def self.disabled?
-        not $config.shrike
+    def self.enabled?
+        if $config.respond_to?(:shrike) and $config.shrike
+            true
+        else
+            false
+        end
     end
 
     # This is all we do for now :)

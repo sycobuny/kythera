@@ -212,7 +212,7 @@ class Uplink
             if self.respond_to?(cmd, true)
                 self.send(cmd, origin, parv)
             else
-                log.warn "no protocol handler for #{cmd.to_s.upcase}"
+                log.debug "no protocol handler for #{cmd.to_s.upcase}"
             end
 
             # Fire off an event for extensions, etc

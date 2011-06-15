@@ -15,8 +15,8 @@ class CloneServ < Service
     attr_reader :user
 
     # Disabled by default
-    def self.disabled?
-        true
+    def self.enabled?
+        false
     end
 
     def initialize(uplink, logger)

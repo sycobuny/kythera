@@ -33,6 +33,18 @@ application will utilize to introduce your clients and to send events your way:
     require 'kythera'
 
     class ChanServ < Service
+        # You must provide this method. Typically you determine whether your
+        # service is enabled or not by checking to see if your configuration
+        # settings exist. If not, they were commented out or unloaded.
+        #
+        def self.enabled?
+            if $config.respond_to?(:chanserv) and $config.chanserv
+                true
+            else
+                false
+            end
+        end
+
         # Your service is always initialized with the uplink and a logger
         def initialize(uplink, logger)
             # Calling `super` sets up the logger, and you don't have to
@@ -49,10 +61,12 @@ application will utilize to introduce your clients and to send events your way:
             # You're free to register any events you'd like to handle, however
             # your class will have an interface for receiving PRIVMSG sent to it
             # so that you don't have to parse _all_ PRIVMSGs.
+            #
             $eventq.handle(:some_event) { my_handler }
 
             # You should also introduce your clients to the uplink here. This
             # method returns your User object.
+            #
             @user = @uplink.introduce_user(nick, username, hostname, realname)
         end
 
@@ -61,6 +75,7 @@ application will utilize to introduce your clients and to send events your way:
         # You must provide a few methods so that Kythera can get at some of
         # your service's information. We need access to your User and your
         # configuration object.
+        #
         attr_reader :config, :user
 
         # You must provide a method that handles PRIVMSG sent your nickname
@@ -68,7 +83,7 @@ application will utilize to introduce your clients and to send events your way:
             # `user`   is the User object that sent the message
             # `params` is an array containing the message sent to your client
             #          that has been tokenized by space
-
+            #
             user   = User
             params = ['REGISTER', '#channel', 'etc']
         end
