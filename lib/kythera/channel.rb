@@ -13,23 +13,23 @@ class Channel
     include Loggable
 
     # Standard IRC status cmodes
-    STATUS_MODES = { 'o' => :operator,
-                     'v' => :voice }
+    @@status_modes = { 'o' => :operator,
+                       'v' => :voice }
 
     # Standard IRC list cmodes
-    LIST_MODES   = { 'b' => :ban }
+    @@list_modes   = { 'b' => :ban }
 
     # Standard IRC cmodes requiring a param
-    PARAM_MODES  = { 'l' => :limited,
-                     'k' => :keyed }
+    @@param_modes  = { 'l' => :limited,
+                       'k' => :keyed }
 
     # Standard boolean IRC cmodes
-    BOOL_MODES   = { 'i' => :invite_only,
-                     'm' => :moderated,
-                     'n' => :no_external,
-                     'p' => :private,
-                     's' => :secret,
-                     't' => :topic_lock }
+    @@bool_modes   = { 'i' => :invite_only,
+                       'm' => :moderated,
+                       'n' => :no_external,
+                       'p' => :private,
+                       's' => :secret,
+                       't' => :topic_lock }
 
     # A list of all channels. The key is the channel name by default
     @@channels = {}
@@ -102,12 +102,12 @@ class Channel
             end
 
             # Status modes
-            if STATUS_MODES.include?(c)
-                mode  = STATUS_MODES[c]
+            if @@status_modes.include?(c)
+                mode  = @@status_modes[c]
                 param = params.shift
 
-            elsif LIST_MODES.include?(c)
-                mode  = LIST_MODES[c]
+            elsif @@list_modes.include?(c)
+                mode  = @@list_modes[c]
                 param = params.shift
 
             # Always has a param (some send the key, some send '*')
@@ -123,12 +123,12 @@ class Channel
                 @limit = action == :add ? param : 0
 
             # The rest, no param
-            elsif BOOL_MODES.include?(c)
-                mode = BOOL_MODES[c]
+            elsif @@bool_modes.include?(c)
+                mode = @@bool_modes[c]
             end
 
             # Add boolean modes to the channel's modes
-            unless STATUS_MODES.include?(c) or LIST_MODES.include?(c)
+            unless @@status_modes.include?(c) or @@list_modes.include?(c)
                 if action == :add
                     @modes << mode
                 else
@@ -136,7 +136,7 @@ class Channel
                 end
             end
 
-            unless STATUS_MODES.include?(c)
+            unless @@status_modes.include?(c)
                 log.debug "mode #{action}ed: #{self} -> #{mode} #{param}"
             end
 
@@ -145,7 +145,7 @@ class Channel
             # Status modes for users get tossed to another method so that
             # how they work can be monkeypatched by protocol modules
             #
-            parse_status_mode(action, mode, param) if STATUS_MODES.include?(c)
+            parse_status_mode(action, mode, param) if @@status_modes.include?(c)
 
             # Post an event for it
             if action == :add

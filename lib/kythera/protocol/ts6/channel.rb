@@ -11,7 +11,7 @@ require 'kythera'
 # This reopens the base Channel class in `kythera/channel.rb`
 class Channel
     # TS6 has except and invex as well as ban
-    LIST_MODES   = { 'b' => :ban,
+    @@list_modes = { 'b' => :ban,
                      'e' => :except,
                      'I' => :invex }
 
