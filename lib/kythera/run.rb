@@ -107,8 +107,19 @@ class Kythera
             # Only check for writable if we have data waiting to be written
             writefd = [@uplink.socket] if @uplink.need_write?
 
+            # Ruby's threads suck. In theory, the timers should
+            # manage themselves in separate threads. Unfortunately,
+            # Ruby has a global lock and the scheduler isn't great, so
+            # this tells select() to timeout when the next timer needs to run.
+            #
+            timeout = (Timer.next_time - Time.now.to_f).round
+            timeout = 1 if timeout == 0 # Don't want 0, that's forever
+            timeout = 60 if timeout < 0 # Less than zero means no timers
+
+            log.debug "selecting for #{timeout} seconds"
+
             # Wait up to 60 seconds for our socket to become readable/writable
-            ret = IO.select([@uplink.socket], writefd, [], 60)
+            ret = IO.select([@uplink.socket], writefd, [], timeout)
 
             # This means select timed out and there's no activity on the socket
             next unless ret
