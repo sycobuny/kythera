@@ -22,14 +22,29 @@ class Shrike < Service
     # A String representation of the version number
     VERSION = "#{V_MAJOR}.#{V_MINOR}.#{V_PATCH}"
 
-    attr_reader :config, :user
-
     # Is this service enabled in the configuration?
+    #
+    # @return [Boolean] true or false
+    #
     def self.enabled?
         if $config.respond_to?(:shrike) and $config.shrike
             true
         else
             false
+        end
+    end
+
+    # Verify our configuration
+    #
+    # @return [Boolean] true or false
+    #
+    def self.verify_configuration
+        c = $config.shrike
+
+        unless c.nickname and c.username and c.hostname and c.realname
+            false
+        else
+            true
         end
     end
 

@@ -19,6 +19,10 @@ class CloneServ < Service
         false
     end
 
+    def self.verify_configuration
+        true
+    end
+
     def initialize(uplink, logger)
         # Prepare the logger and uplink
         super
