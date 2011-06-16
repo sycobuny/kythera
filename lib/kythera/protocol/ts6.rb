@@ -66,7 +66,15 @@ module Protocol::TS6
     # @param channel can be a Channel or a string
     #
     def join(user, channel)
-        channel = Channel.channels[channel] if channel.kind_of?(String)
+        if channel.kind_of?(String)
+            if chanobj = Channel.channels[channel]
+                channel = chanobj
+            else
+                # This is a nonexistant channel
+                channel = Channel.new(channel, Time.now.to_i, @logger)
+            end
+        end
+
         send_sjoin(channel.name, channel.timestamp, user.uid)
 
         channel.add_user(user)
