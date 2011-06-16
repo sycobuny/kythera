@@ -59,7 +59,14 @@ class DNSBLService < Service
     def initialize(uplink, logger)
         super # Prepare uplink/logger objects
 
+        # Shortcut to our configuration info
         @config = $config.dnsblserv
+
+        # If a delay isn't provided in the config, assume it's zero
+        @config.delay ||= 0
+
+        # Number of users currently waiting to be checked
+        @needs_checking = 0
 
         log.info "dnsblserv module loaded (version #{VERSION})"
 
@@ -67,13 +74,24 @@ class DNSBLService < Service
         @bursting = true
 
         # Listen for user connections
-        $eventq.handle(:user_added) { |user| check_user(user) }
+        $eventq.handle(:user_added) { |user| queue_user(user) }
 
         # Enable BL checking after the burst is done
         $eventq.handle(:end_of_burst) { @bursting = false }
     end
 
     private
+
+    def queue_user(user)
+        return if @bursting
+
+        # Calculate our time delay for this check
+        time = (@needs_checking * @config.delay) + @config.delay
+
+        Timer.after(time) { check_user(user) }
+
+        @needs_checking += 1
+    end
 
     def check_user(user)
         return if @bursting
@@ -93,13 +111,15 @@ class DNSBLService < Service
             rescue Resolv::ResolvError
                 next
             else
-                log.debug "dnsbl positive: #{check_addr}"
+                log.info "dnsbl positive: #{check_addr}"
                 # XXX - set the kline!
 
                 # We don't need to check other lists since it's positive
                 break
             end
         end
+
+        @needs_checking -= 1
     end
 end
 
@@ -134,5 +154,9 @@ module DNSBLService::Configuration::Methods
     def blacklist(address)
         self.blacklists ||= []
         self.blacklists << address
+    end
+
+    def delay(seconds)
+        self.delay = seconds
     end
 end

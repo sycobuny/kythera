@@ -166,5 +166,12 @@ configure do
 
         # The DroneBL is good, but not as well managed as SwiftBL
         blacklist 'dnsbl.dronebl.org'
+
+        # How many seconds should we wait between DNSBL lookups?
+        #
+        # If you set this too low Services could become unresponsive if a
+        # large number of users connect within a short time period.
+        #
+        delay 2
     end
 end

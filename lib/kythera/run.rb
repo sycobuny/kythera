@@ -116,8 +116,6 @@ class Kythera
             timeout = 1 if timeout == 0 # Don't want 0, that's forever
             timeout = 60 if timeout < 0 # Less than zero means no timers
 
-            log.debug "selecting for #{timeout} seconds"
-
             # Wait up to 60 seconds for our socket to become readable/writable
             ret = IO.select([@uplink.socket], writefd, [], timeout)
 
