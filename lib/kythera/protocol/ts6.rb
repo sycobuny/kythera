@@ -36,7 +36,7 @@ module Protocol::TS6
     # @param [String] real user's realname / gecos
     #
     def introduce_user(nick, user, host, real)
-        return send_uid(nick, user, host, real)
+        send_uid(nick, user, host, real)
     end
 
     # Sends a PRIVMSG to a user
@@ -46,7 +46,7 @@ module Protocol::TS6
     # @param [String] message the message to send
     #
     def privmsg(origin, target, message)
-        target = user.uid if target.kind_of?(User)
+        target = target.uid if target.kind_of?(User)
         send_privmsg(origin.uid, target, message)
     end
 

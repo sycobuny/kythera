@@ -127,6 +127,7 @@ class Uplink
         end
     end
 
+    # Matches CR or LF
     CR_OR_LF = /\r|\n/
 
     # Reads waiting data from the socket and stores each "line" in the recvq

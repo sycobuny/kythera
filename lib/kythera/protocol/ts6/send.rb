@@ -54,11 +54,9 @@ module Protocol::TS6
 
         @@current_uid.next!
 
-        user = User.new(nil, nick, uname, host, ip, real, nil, uid, ts, @logger)
-
         @sendq << "UID #{nick} 1 #{ts} + #{uname} #{host} #{ip} #{uid} :#{real}"
 
-        return user
+        User.new(nil, nick, uname, host, ip, real, nil, uid, ts, @logger)
     end
 
     # :UID PRIVMSG <TARGET_UID> :<MESSAGE>

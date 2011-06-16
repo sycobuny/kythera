@@ -8,18 +8,29 @@
 
 require 'rake'
 require 'rake/testtask'
-require 'yard'
+
+begin
+    require 'yard'
+rescue LoadError
+    $yard = false
+else
+    $yard = true
+end
 
 $LOAD_PATH.unshift File.expand_path('lib', File.dirname(__FILE__))
+$LOAD_PATH.unshift File.expand_path('ext', File.dirname(__FILE__))
+
 require 'kythera'
 
 task :default => :test
 
 task :clean => ['clean:rbc', 'clean:doc']
 
-YARD::Rake::YardocTask.new do |t|
-    t.files   = ['lib/**/*.rb', '-', 'doc/*']
-    t.options = ['-oyardoc']
+if $yard
+    YARD::Rake::YardocTask.new do |t|
+        t.files   = ['lib/**/*.rb', '-', 'doc/*']
+        t.options = ['-oyardoc']
+    end
 end
 
 namespace :clean do
