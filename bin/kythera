@@ -159,13 +159,26 @@ configure do
     #
     dnsbl_service do
         # The EFnetRBL is huge and very accurate
-        blacklist 'rbl.efnetrbl.org'
+        # See http://rbl.efnet.org/
+        #
+        blacklist 'rbl.efnet.org'
 
         # The SwiftBL is good and very well managed
         blacklist 'dnsbl.swiftbl.org'
 
         # The DroneBL is good, but not as well managed as SwiftBL
+        # See http://dronebl.org
+        #
         blacklist 'dnsbl.dronebl.org'
+
+        # See http://ahbl.org/docs/ircbl
+        blacklist 'ircbl.ahbl.org'
+
+        # See http://www.sectoor.de/tor.php
+        blacklist 'tor.dnsbl.sectoor.de'
+
+        # See http://www.njabl.org/use.html
+        blacklist 'dnsbl.njabl.org'
 
         # How many seconds should we wait between DNSBL lookups?
         #
