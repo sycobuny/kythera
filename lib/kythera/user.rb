@@ -26,8 +26,8 @@ class User
     # The user's Server object
     attr_reader :server
 
-    # The user's nickname
-    attr_reader :nickname
+    # The user's nickname (can change)
+    attr_accessor :nickname
 
     # The user's username
     attr_reader :username

@@ -164,6 +164,24 @@ module Protocol::TS6
         s.add_user(u)
     end
 
+    # Handles an incoming NICK
+    #
+    # parv[0] -> new nickname
+    # parv[1] -> ts
+    #
+    def irc_nick(origin, parv)
+        return unless parv.length == 2 # We don't want TS5 introductions
+
+        unless user = User.users[origin]
+            log.error "got nick change for non-existant UID: #{origin}"
+            return
+        end
+
+        log.debug "nick change: #{user.nickname} -> #{parv[0]} [#{origin}]"
+
+        user.nickname = parv[0]
+    end
+
     # Handles an incoming QUIT
     #
     # parv[0] -> quit message
