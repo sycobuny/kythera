@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # benchmark/protocol/ts6/sjoin.rb: benchmark channel introductions
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

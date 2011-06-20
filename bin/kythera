@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # bin/kythera: configuration file
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

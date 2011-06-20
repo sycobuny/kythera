@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # benchmark/theory/irc_parsing.rb: different methods of parsing IRC
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

@@ -1,4 +1,4 @@
-    kythera: services for TSora IRC networks
+    kythera: services for IRC networks
 
     Copyright (c) 2011 Eric Will <rakaur@malkier.net>
     Rights to this code are documented in doc/license.txt

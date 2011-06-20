@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # rakefile: automated task runner
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

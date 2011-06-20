@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # lib/kythera/service/shrike/configuration.rb: implements configuration DSL
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

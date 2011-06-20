@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # lib/kythera/protocol/ts6/channel.rb: TS6-specific Channel class
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

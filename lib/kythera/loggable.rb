@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # lib/kythera/loggable.rb: instant logging, just include Loggable
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

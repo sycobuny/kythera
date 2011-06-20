@@ -1,12 +1,12 @@
-    kythera: services for TSora IRC networks
+    kythera: services for IRC networks
 
     Copyright (c) 2011 Eric Will <rakaur@malkier.net>
     Rights to this code are documented in doc/license.txt
 
-kythera -- services for TSora IRC networks
+kythera -- services for IRC networks
 ==========================================
 
-This application is free but copyrighted software; see LICENSE.
+This application is free but copyrighted software; see doc/license.txt.
 
 To start the program, edit the configuration options in `bin/kythera` to
 your satisfaction and run `./bin/kythera` at your terminal. Good luck!
@@ -23,11 +23,11 @@ More information and code repositories can be found on [Github][].
 
 --------------------------------------------------------------------------------
 
-Kythera is a set of services for TSora-based IRC networks. Kythera is
-extremely extensible and is not limited to providing a specific set of
-services such as `NickServ`, `ChanServ` vs. Undernet-style `X`, etc. You can
-configure the service to offer pretty much anything you want. If it's not there,
-you can easily add support for it if you know Ruby.
+Kythera is a set of services for IRC networks. Kythera is extremely extensible
+and is not limited to providing a specific set of services such as `NickServ`,
+`ChanServ` vs. Undernet-style `X`, etc. You can configure the service to offer
+pretty much anything you want. If it's not there, you can easily add support
+for it if you know Ruby.
 
 Ruby also brings us to my next point. Many people have told me that IRC services
 must be implemented in C in order to have any hope of keeping up with medium-
@@ -43,6 +43,18 @@ that Kythera can compete on performance, and obliterate the competition on
 ease-of-use and ease-of-hacking.
 
 [shrike]: http://github.com/rakaur/shrike/
+
+## IRCd support ##
+
+Kythera can, in theory, support any IRCd. So long as a protocol module has
+been written, your IRCd should work. Kythera ships with support for any
+TS6-based IRCd. These include:
+
+  * ircd-ratbox (tested with 2.2.9)
+  * charybdis (tested with 3.2.1)
+
+Other TS6-based IRCds may work. For now, the TS6 module only provides support
+for TS6-only networks. If you link a non-TS6 server, Kythera will ignore it.
 
 ## Runtime requirements ##
 

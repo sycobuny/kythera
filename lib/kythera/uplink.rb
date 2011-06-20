@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # lib/kythera/uplink.rb: represents the interface to the remote IRC server
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
@@ -206,6 +206,9 @@ class Uplink
             parv = tokens.split(RE_SPACE)
             cmd  = parv.delete_at(0)
             parv << args
+
+            # Some IRCds have commands like '&' that we translate for methods
+            TOKENS.each { |k, v| cmd.sub!(k, v) } if defined?(TOKENS)
 
             cmd = "irc_#{cmd.downcase}".to_sym
 

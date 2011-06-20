@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # lib/kythera/protocol/ts6.rb: implements the TS6 protocol
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>

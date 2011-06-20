@@ -1,5 +1,5 @@
 #
-# kythera: services for TSora IRC networks
+# kythera: services for IRC networks
 # lib/kythera/timer.rb: execute code at certain times
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
