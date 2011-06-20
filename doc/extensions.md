@@ -72,11 +72,10 @@ application will utilize to introduce your clients and to send events your way:
 
         public
 
-        # You must provide a few methods so that Kythera can get at some of
-        # your service's information. We need access to your User and your
-        # configuration object.
+        # If you want your @user to receive PRIVMSGs, you must provide access
+        # to it with a reader.
         #
-        attr_reader :config, :user
+        attr_reader :user
 
         # You must provide a method that handles PRIVMSG sent your nickname
         def irc_privmsg(user, params)

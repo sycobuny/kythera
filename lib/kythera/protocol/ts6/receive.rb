@@ -340,12 +340,15 @@ module Protocol::TS6
     def irc_privmsg(origin, parv)
         return if parv[0][0].chr == '#'
 
+        # Look up the sending user
         user = User.users[origin]
 
         # Which one of our clients was it sent to?
-        srv = Service.services.find { |s| s.user.uid == parv[0] }
+        srv = Service.services.find do |s|
+            s.user.uid == parv[0] if s.respond_to?(:user)
+        end
 
-        # Send it to the service
-        srv.send(:irc_privmsg, user, parv[1].split(' '))
+        # Send it to the service (if we found one)
+        srv.send(:irc_privmsg, user, parv[1].split(' ')) if srv
     end
 end

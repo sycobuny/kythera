@@ -85,7 +85,7 @@ configure do
         # Can be any number, positive or negative. If missing, it's
         # assumed to be zero.
         #
-        priority 1;
+        priority 1
 
         # If the server name differs from the connection address, specify here
         name 'test.malkier.net'
