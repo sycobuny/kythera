@@ -208,8 +208,9 @@ class Uplink
             parv << args
 
             # Some IRCds have commands like '&' that we translate for methods
-            TOKENS.each { |k, v| cmd.sub!(k, v) } if defined?(TOKENS)
+            cmd = TOKENS[cmd] if defined?(TOKENS)
 
+            # Downcase it and turn it into a Symbol
             cmd = "irc_#{cmd.downcase}".to_sym
 
             # Call the protocol-specific handler
