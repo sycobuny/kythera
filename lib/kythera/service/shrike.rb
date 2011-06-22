@@ -8,6 +8,9 @@
 
 require 'kythera'
 
+require 'kythera/service/shrike/commands'
+require 'kythera/service/shrike/configuration'
+
 # This service is designed to implement the functionality of Shrike IRC Services
 class Shrike < Service
     # For backwards-incompatible changes
@@ -21,6 +24,9 @@ class Shrike < Service
 
     # A String representation of the version number
     VERSION = "#{V_MAJOR}.#{V_MINOR}.#{V_PATCH}"
+
+    # Our User object is visible for the Service API
+    attr_reader :user
 
     # Is this service enabled in the configuration?
     #
@@ -75,27 +81,12 @@ class Shrike < Service
 
     def irc_privmsg(user, params)
         cmd = params.delete_at(0)
-        cmd = "do_#{cmd}".downcase.to_sym
+        meth = "do_#{cmd}".downcase.to_sym
 
-        self.send(cmd, user, params) if self.respond_to?(cmd, true)
-    end
-
-    private
-
-    # This is dangerous, and is only here for my testing purposes - XXX
-    def do_raw(user, params)
-        @uplink.raw(params.join(' '))
-    end
-
-    # Extremely dangerous, this is here only for my testing purposes! - XXX
-    def do_eval(user, params)
-        code = params.join(' ')
-
-        result = eval(code)
-
-        @uplink.privmsg(@user, @config.channel, "#{result.inspect}")
+        if self.respond_to?(meth, true)
+            self.send(meth, user, params)
+        else
+            @uplink.notice(@user, user, "Invalid command: \2#{cmd}\2")
+        end
     end
 end
-
-# This has to be at the end because this file needs to see the class above
-require 'kythera/service/shrike/configuration'
