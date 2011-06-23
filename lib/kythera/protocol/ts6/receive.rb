@@ -97,9 +97,9 @@ module Protocol::TS6
     def irc_ping(origin, parv)
         send_pong(parv[0])
 
-        if $config.me.bursting
-            delta = Time.now - $config.me.bursting
-            $config.me.bursting = false
+        if $state[:bursting]
+            delta = Time.now - $state[:bursting]
+            $state[:bursting] = false
 
             $eventq.post(:end_of_burst, delta)
         end

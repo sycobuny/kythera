@@ -81,6 +81,7 @@ class Kythera
         end
 
         self.log_level = $config.me.logging if logging
+        $db.loggers << @logger if debug
 
         # Write a pid file
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }

@@ -27,12 +27,16 @@ require 'ostruct'
 require 'singleton'
 require 'socket'
 
+require 'digest/sha2'
+
 # Require all of our files here and only here
 require 'kythera/loggable'
 require 'kythera/channel'
+require 'kythera/database'
 require 'kythera/event'
 require 'kythera/protocol'
 require 'kythera/run'
+require 'kythera/securerandom'
 require 'kythera/server'
 require 'kythera/service'
 require 'kythera/timer'
@@ -49,6 +53,9 @@ end
 # @param [Proc] block contains the actual configuration code
 #
 def configure(&block)
+    # This is for storing random application states
+    $state = {}
+
     $config = Object.new
 
     class << $config

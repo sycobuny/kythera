@@ -35,7 +35,7 @@ class Uplink
         $eventq.handle(:recvq_ready)     { parse }
 
         $eventq.handle(:connected) { send_handshake }
-        $eventq.handle(:connected) { $config.me.bursting = Time.now }
+        $eventq.handle(:connected) { $state[:bursting] = Time.now }
         $eventq.handle(:connected) { Service.instantiate(self, @logger) }
 
         $eventq.handle(:end_of_burst) do |delta|
