@@ -19,6 +19,8 @@ module Database
     # verification_key
     #
     class User < Sequel::Model
+        one_to_many :user_flags
+
         plugin :validation_helpers
 
         # Registers a new user
@@ -69,6 +71,73 @@ module Database
         #
         def authenticate(passwd)
             Digest::SHA2.hexdigest(salt.unpack('m')[0] + passwd) == password
+        end
+
+        # Returns user flags as symbols instead of objects
+        #
+        # @return [Array] symbols for all flags
+        #
+        def flags
+            @flags ||= user_flags.collect { |uf| uf.flag.to_sym }
+        end
+
+        # Adds flags to a user. NB: params do not necessarily have to be symbols
+        # as the method converts them internally.
+        #
+        # @param [Symbol] a flag to add
+        # @param [Symbol] (optional) another flag to add
+        # @etc
+        # @return [Array] the flags sent to the method
+        #
+        def add_flags(*flags_to_add)
+            $db.transaction do
+                flags_to_add.each do |flag|
+                    next if flags.include?(flag.to_sym)
+
+                    user_flag = UserFlag.new
+                    user_flag.flag = flag.to_s
+
+                    flags << flag.to_sym
+                    add_user_flag(user_flag)
+                end
+            end
+        end
+
+        # Removes flags from a user. NB: params do not necessarily have to be
+        # symbols as the method converts them internally.
+        #
+        # @param [Symbol] a flag to remove
+        # @param [Symbol] (optional) another flag to remove
+        # @etc
+        # @return [Array] the flags sent to the method
+        #
+        def remove_flags(*flags_to_rem)
+            uf = user_flags.to_a
+
+            $db.transaction do
+                flags_to_rem.each do |flag|
+                    ftr = uf.find { |f| f.flag == flag.to_s }
+                    next unless ftr
+
+                    flags.delete_if { |f| f == flag.to_sym }
+                    ftr.delete
+                end
+            end
+        end
+    end
+
+    # A user flag indicates a user is given elevated privileges
+    class UserFlag < Sequel::Model
+        many_to_one :user
+
+        # Converts to a String
+        def to_s
+            flag
+        end
+
+        # Converts to a Symbol
+        def to_sym
+            flag.to_sym
         end
     end
 end
