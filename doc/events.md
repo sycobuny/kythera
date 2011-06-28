@@ -99,3 +99,15 @@ List of Events
       * mode symbol
       * mode params, or `nil`
       * a `Channel` object
+
+  * mode\_added\_to\_user
+    * a mode has been added to a user
+    * params:
+      * mode symbol
+      * a `User` object
+
+  * mode\_deleted\_from\_user
+    * a mode has been deleted from a user
+    * params:
+      * mode symbol
+      * a `User` object

@@ -10,6 +10,12 @@ require 'kythera'
 
 # Implements TS6 protocol-specific methods
 module Protocol::TS6
+    # Removes the first character of the string
+    REMOVE_FIRST = 1 .. -1
+
+    # Special constant for grabbing mode params
+    GET_MODES_PARAMS = 2 ... -1
+
     private
 
     # Handles an incoming PASS
@@ -20,6 +26,9 @@ module Protocol::TS6
     # parv[3] -> sid of remote server
     #
     def irc_pass(origin, parv)
+        # Start the burst timer
+        $state[:bursting] = Time.now
+
         if parv[0] != @config.receive_password.to_s
             log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
@@ -157,9 +166,7 @@ module Protocol::TS6
             return
         end
 
-        m = parv[3][1 .. -1]
-
-        u = User.new(s, p[0], p[4], p[5], p[6], p[8], m, p[7], p[2], @logger)
+        u = User.new(s, p[0], p[4], p[5], p[6], p[8], p[3], p[7], p[2], @logger)
 
         s.add_user(u)
     end
@@ -196,12 +203,6 @@ module Protocol::TS6
 
         log.debug "user quit: #{user.nickname} [#{user.uid}]"
     end
-
-    # Removes the first character of the string
-    REMOVE_FIRST = 1 .. -1
-
-    # Special constant for grabbing mode params
-    GET_MODES_PARAMS = 2 ... -1
 
     # Handles an incoming SJOIN (channel burst)
     #

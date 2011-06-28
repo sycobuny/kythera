@@ -23,6 +23,12 @@ class User
         @@users
     end
 
+    # Standard IRC user modes
+    @@user_modes = { 'i' => :invisible,
+                     's' => :receive_notices,
+                     'w' => :receive_wallops,
+                     'o' => :operator }
+
     # The user's Server object
     attr_reader :server
 
@@ -38,6 +44,9 @@ class User
     # The user's gecos/realname
     attr_reader :realname
 
+    # The user's umodes
+    attr_reader :modes
+
     # A Hash keyed by Channel of the user's status modes
     attr_reader :status_modes
 
@@ -48,23 +57,71 @@ class User
         @username = user
         @hostname = host
         @realname = real
-        @modes    = umodes
+        @modes    = []
         @logger   = nil
 
         @status_modes = {}
         self.logger   = logger
+
+        # Do our user modes
+        parse_modes(umodes)
 
         @@users[nick] = self
     end
 
     public
 
+    # String representation is just `@nickname`
+    def to_s
+        "#{@nickname}"
+    end
+
     # Is this user an IRC operator?
     #
     # @return [Boolean] true or false
     #
     def operator?
-        @modes.include?('o')
+        @modes.include?(:operator)
+    end
+
+    # Parses a mode string and updates user state
+    #
+    # @param [String] modes the mode string
+    #
+    def parse_modes(modes)
+        action = nil # :add or :delete
+
+        modes.each_char do |c|
+            mode, param = nil
+
+            if c == '+'
+                action = :add
+                next
+            elsif c == '-'
+                action = :delete
+                next
+            end
+
+            # Do we know about this mode and what it means?
+            if @@user_modes.include?(c)
+                mode  = @@user_modes[c]
+
+                if action == :add
+                    @modes << mode
+                else
+                    @modes.delete(mode)
+                end
+            end
+
+            log.debug "mode #{action}ed: #{self} -> #{mode}"
+
+            # Post an event for it
+            if action == :add
+                $eventq.post(:mode_added_to_user, mode, self)
+            elsif action == :delete
+                $eventq.post(:mode_deleted_from_user, mode, self)
+            end
+        end
     end
 
     # Adds a status mode for this user on a particular channel

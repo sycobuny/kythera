@@ -27,15 +27,18 @@ class User
         @hostname  = host.to_s
         @ip        = ip.to_s
         @realname  = real.to_s
-        @modes     = umodes.to_s
         @uid       = uid.to_s
         @timestamp = ts
+        @modes     = []
         @logger    = nil
 
         @status_modes = {}
         self.logger   = logger
 
         log.error "new user replacing user with same UID!" if @@users[uid]
+
+        # Do our user modes
+        parse_modes(umodes)
 
         @@users[uid] = self
 
