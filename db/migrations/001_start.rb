@@ -26,5 +26,20 @@ Sequel.migration do
             # Index the email address
             index :email
         end
+
+        create_table :user_flags do
+            primary_key :id
+
+            # The only columns are user_id and flag, both required
+            # The user_id column is associated with the users table
+            Integer :user_id, :null => false
+            String  :flag,    :null => false
+
+            # The user_id column is associated with the users table
+            foreign_key [:user_id], :users
+
+            # Add a unique constraint on the two columns
+            unique [:user_id, :flag]
+        end
     end
 end
