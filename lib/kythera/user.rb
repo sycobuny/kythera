@@ -25,8 +25,7 @@ class User
 
     # Standard IRC user modes
     @@user_modes = { 'i' => :invisible,
-                     's' => :receive_notices,
-                     'w' => :receive_wallops,
+                     'w' => :wallop,
                      'o' => :operator }
 
     # The user's Server object

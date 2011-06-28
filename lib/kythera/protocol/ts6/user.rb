@@ -10,6 +10,12 @@ require 'kythera'
 
 # This reopens the base User class in `kythera/user.rb`
 class User
+    # Ratbox user modes
+    @@user_modes = { 'a' => :administrator,
+                     'i' => :invisible,
+                     'o' => :operator,
+                     'w' => :wallop }
+
     # The user's IP address
     attr_reader :ip
 
