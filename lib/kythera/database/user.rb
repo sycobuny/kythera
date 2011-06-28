@@ -73,20 +73,17 @@ module Database
             Digest::SHA2.hexdigest(salt.unpack('m')[0] + passwd) == password
         end
 
-        # Returns user flags as symbols instead of objects
+        # Returns user flags as Symbols instead of objects
         #
-        # @return [Array] symbols for all flags
+        # @return [Array] Symbols for all flags
         #
         def flags
             @flags ||= user_flags.collect { |uf| uf.flag.to_sym }
         end
 
-        # Adds flags to a user. NB: params do not necessarily have to be symbols
-        # as the method converts them internally.
+        # Adds flags to a User
         #
         # @param [Symbol] a flag to add
-        # @param [Symbol] (optional) another flag to add
-        # @etc
         # @return [Array] the flags sent to the method
         #
         def add_flags(*flags_to_add)
@@ -103,12 +100,8 @@ module Database
             end
         end
 
-        # Removes flags from a user. NB: params do not necessarily have to be
-        # symbols as the method converts them internally.
-        #
+        # Removes flags from a User
         # @param [Symbol] a flag to remove
-        # @param [Symbol] (optional) another flag to remove
-        # @etc
         # @return [Array] the flags sent to the method
         #
         def remove_flags(*flags_to_rem)
