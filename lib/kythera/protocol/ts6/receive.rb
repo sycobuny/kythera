@@ -47,7 +47,7 @@ module Protocol::TS6
         end
 
         # No origin means we're handshaking, so this must be our uplink
-        not_used, server = Server.servers.first
+        server = Server.servers.values.first
 
         # Make sure their name matches what we expect
         unless parv[0] == @config.name
@@ -256,7 +256,7 @@ module Protocol::TS6
 
             unless user = User.users[uid]
                 # Maybe it's a nickname?
-                not_used, user = User.users.find { |k, v| v.nickname == uid }
+                user = User.users.values.find { |u| u.nickname == uid }
                 unless user
                     log.error "got non-existant UID in SJOIN: #{uid}"
                     next
