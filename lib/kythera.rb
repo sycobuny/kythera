@@ -129,8 +129,8 @@ module Kythera::Configuration
     #
     def uplink(host, port = 6667, &block)
         ul      = OpenStruct.new
-        ul.host = host
-        ul.port = port
+        ul.host = host.to_s
+        ul.port = port.to_i
 
         ul.extend Kythera::Configuration::Uplink
         ul.instance_eval(&block)
@@ -165,16 +165,16 @@ module Kythera::Configuration::Daemon
     private
 
     def name(name)
-        self.name = name
+        self.name = name.to_s
     end
 
     def description(desc)
-        self.description = desc
+        self.description = desc.to_s
     end
 
     def admin(name, email)
-        self.admin_name  = name
-        self.admin_email = email
+        self.admin_name  = name.to_s
+        self.admin_email = email.to_s
     end
 
     def logging(level)
@@ -182,7 +182,7 @@ module Kythera::Configuration::Daemon
     end
 
     def reconnect_time(time)
-        self.reconnect_time = time
+        self.reconnect_time = time.to_i
     end
 
     def verify_emails(bool)
@@ -190,7 +190,7 @@ module Kythera::Configuration::Daemon
     end
 
     def mailer(mailer)
-        self.mailer = mailer
+        self.mailer = mailer.to_s
     end
 end
 
@@ -226,20 +226,20 @@ module Kythera::Configuration::Uplink
     end
 
     def name(name)
-        self.name = name
+        self.name = name.to_s
     end
 
     def bind(host, port = nil)
-        self.bind_host = host
-        self.bind_port = port
+        self.bind_host = host.to_s
+        self.bind_port = port.to_i
     end
 
     def send_password(password)
-        self.send_password = password
+        self.send_password = password.to_s
     end
 
     def receive_password(password)
-        self.receive_password = password
+        self.receive_password = password.to_s
     end
 
     def network(name)
@@ -262,7 +262,7 @@ module Kythera::Configuration::Uplink
     end
 
     def sid(sid)
-        self.sid = sid
+        self.sid = sid.to_s
     end
 
     def casemapping(mapping)

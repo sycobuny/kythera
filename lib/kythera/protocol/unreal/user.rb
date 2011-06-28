@@ -19,11 +19,11 @@ class User
 
     # Creates a new user and adds it to the list keyed by nick
     def initialize(server, nick, user, host, real, ts, logger)
-        @server    = server.to_s
-        @nickname  = nick.to_s
-        @username  = user.to_s
-        @hostname  = host.to_s
-        @realname  = real.to_s
+        @server    = server
+        @nickname  = nick
+        @username  = user
+        @hostname  = host
+        @realname  = real
         @modes     = nil
         @timestamp = ts.to_i
         @logger    = nil

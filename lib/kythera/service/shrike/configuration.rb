@@ -37,19 +37,19 @@ module Shrike::Configuration::Methods
     private
 
     def nickname(nick)
-        self.nickname = nick
+        self.nickname = nick.to_s
     end
 
     def username(user)
-        self.username = user
+        self.username = user.to_s
     end
 
     def hostname(host)
-        self.hostname = host
+        self.hostname = host.to_s
     end
 
     def realname(real)
-        self.realname = real
+        self.realname = real.to_s
     end
 
     def channel(chan)

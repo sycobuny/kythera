@@ -23,7 +23,7 @@ module Protocol::TS6
         # Start the burst timer
         $state[:bursting] = Time.now
 
-        if parv[0] != @config.receive_password.to_s
+        if parv[0] != @config.receive_password
             log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
         else
