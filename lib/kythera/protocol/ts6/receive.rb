@@ -345,6 +345,20 @@ module Protocol::TS6
         channel.parse_modes(modes, params)
     end
 
+    # Handles an incoming MODE
+    #
+    # parv[0] -> UID of the user with the mode change
+    # parv[1] -> mode string
+    #
+    def irc_mode(origin, parv)
+        unless user = User.users[parv[0]]
+            log.debug "Got MODE message for unknown UID: #{parv[0]}"
+            return
+        end
+
+        user.parse_modes(parv[1])
+    end
+
     # Handles an incoming PRIVMSG
     #
     # parv[0] -> target

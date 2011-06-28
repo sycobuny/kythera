@@ -137,7 +137,7 @@ class Channel
             end
 
             unless @@status_modes.include?(c)
-                log.debug "mode #{action}ed: #{self} -> #{mode} #{param}"
+                log.debug "mode #{action}: #{self} -> #{mode} #{param}"
             end
 
             # XXX - list modes

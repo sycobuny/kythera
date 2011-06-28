@@ -16,6 +16,13 @@ require 'kythera/protocol/ts6/user'
 
 # Implements TS6 protocol-specific methods
 module Protocol::TS6
+    # Removes the first character of the string
+    REMOVE_FIRST = 1 .. -1
+
+    # Special constant for grabbing mode params
+    GET_MODES_PARAMS = 2 ... -1
+
+    # The current UID for Services
     @@current_uid = 'AAAAAA'
 
     public
