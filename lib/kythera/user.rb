@@ -111,9 +111,9 @@ class User
                 else
                     @modes.delete(mode)
                 end
-            end
 
-            log.debug "mode #{action}ed: #{self} -> #{mode}"
+                log.debug "mode #{action}ed: #{self} -> #{mode}"
+            end
 
             # Post an event for it
             if action == :add

@@ -17,6 +17,9 @@ module Protocol::Unreal
     #
     # parv[0] -> password
     def irc_pass(origin, parv)
+        # Start the burst timer
+        $state[:bursting] = Time.now
+
         if parv[0] != @config.receive_password.to_s
             log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
@@ -119,12 +122,6 @@ module Protocol::Unreal
 
         log.debug "user quit: #{user.nickname}"
     end
-
-    # Removes the first character of the string
-    REMOVE_FIRST = 1 .. -1
-
-    # Special constant for grabbing mode params
-    GET_MODES_PARAMS = 2 ... -1
 
     # Handles an incoming SJOIN (channel burst)
     #
