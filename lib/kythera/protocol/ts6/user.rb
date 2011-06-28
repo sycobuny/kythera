@@ -21,14 +21,14 @@ class User
 
     # Creates a new user and adds it to the list keyed by UID
     def initialize(server, nick, user, host, ip, real, umodes, uid, ts, logger)
-        @server    = server
-        @nickname  = nick
-        @username  = user
-        @hostname  = host
-        @ip        = ip
-        @realname  = real
-        @modes     = umodes
-        @uid       = uid
+        @server    = server.to_s
+        @nickname  = nick.to_s
+        @username  = user.to_s
+        @hostname  = host.to_s
+        @ip        = ip.to_s
+        @realname  = real.to_s
+        @modes     = umodes.to_s
+        @uid       = uid.to_s
         @timestamp = ts
         @logger    = nil
 

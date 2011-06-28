@@ -29,7 +29,7 @@ module Protocol::Unreal
 
     # PROTOCTL protocol options
     def send_protoctl
-        @sendq << "PROTOCTL NOQUIT VHP SJOIN SJOIN2 UMODE2 SJ3"
+        @sendq << "PROTOCTL NOQUIT VHP SJOIN SJOIN2 SJ3"
     end
 
     # SERVER server.name 1 :server description
@@ -67,11 +67,11 @@ module Protocol::Unreal
     end
 
     # :source NOTICE target :message
-    def send_privmsg(user, target, message)
+    def send_notice(source, target, message)
         @sendq << ":#{source} NOTICE #{target} :#{message}"
     end
 
-    # :server.name ~ timestamp channel +modes[ modeparams] :memberlist
+    # :server.name SJOIN timestamp channel +modes[ modeparams] :memberlist
     def send_sjoin(channel, timestamp, nick)
         @sendq << "SJOIN #{timestamp} #{channel} + :@#{nick}"
     end

@@ -33,7 +33,7 @@ class Channel
         @modes     = []
         @logger    = nil
 
-        # Keyed by UID
+        # Keyed by nick
         @members = {}
 
         self.logger = logger

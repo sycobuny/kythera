@@ -14,15 +14,18 @@ class User
     # The user's timestamp
     attr_reader :timestamp
 
+    # The user's modes
+    attr_accessor :modes
+
     # Creates a new user and adds it to the list keyed by nick
     def initialize(server, nick, user, host, real, ts, logger)
-        @server    = server
-        @nickname  = nick
-        @username  = user
-        @hostname  = host
-        @realname  = real
+        @server    = server.to_s
+        @nickname  = nick.to_s
+        @username  = user.to_s
+        @hostname  = host.to_s
+        @realname  = real.to_s
         @modes     = nil
-        @timestamp = ts
+        @timestamp = ts.to_i
         @logger    = nil
 
         @status_modes = {}
@@ -37,11 +40,7 @@ class User
         $eventq.post(:user_added, self)
     end
 
-    def change_modes(change)
-        @modes = change # XXX
-    end
-
-    def set_host(host)
+    def hostname=(host)
         log.debug "changing #{@nickname}'s host from #{@hostname} to #{host}"
         @hostname = host
     end

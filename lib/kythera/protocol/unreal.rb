@@ -44,8 +44,8 @@ module Protocol::Unreal
     # @param [String] message the message to send
     #
     def privmsg(origin, target, message)
-        target = target.nick if target.kind_of?(User)
-        send_privmsg(origin.nick, target, message)
+        target = target.nickname if target.kind_of?(User)
+        send_privmsg(origin.nickname, target, message)
     end
 
     # Sends a NOTICE to a user
@@ -55,7 +55,7 @@ module Protocol::Unreal
     # @param [String] message the message to send
     #
     def notice(origin, user, message)
-        send_notice(origin.nick, user.nick, message)
+        send_notice(origin.nickname, user.nickname, message)
     end
 
     # Makes one of our clients join a channel

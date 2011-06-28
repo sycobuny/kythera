@@ -286,26 +286,20 @@ module Protocol::Unreal
     # parv[-1] -> timestamp if origin is a server
     #
     def irc_mode(origin, parv)
-        user, channel = find_user_and_channel(origin, parv[0], :MODE)
-        unless user and channel
-            channel = Channel.channels[parv[0]]
-            return unless channel
+        if user = User.users[parv[0]]
+            user.modes = parv[1][REMOVE_FIRST] # XXX
+        else
+            user, channel = find_user_and_channel(origin, parv[0], :MODE)
+            unless user and channel
+                channel = Channel.channels[parv[0]]
+                return unless channel
+            end
+
+            params = parv[GET_MODES_PARAMS]
+            modes  = params.delete_at(0)
+
+            channel.parse_modes(modes, params)
         end
-
-        params = parv[GET_MODES_PARAMS]
-        modes  = params.delete_at(0)
-
-        channel.parse_modes(modes, params)
-    end
-
-    # Handles an incoming UMODE2
-    #
-    # parv[0] -> mode change
-    #
-    def irc_umode2(origin, parv)
-        user = User.users[origin]
-
-        user.change_modes(parv[0])
     end
 
     # Handles an incoming PRIVMSG
@@ -335,7 +329,7 @@ module Protocol::Unreal
     def irc_sethost(origin, parv)
         user = User.users[origin]
 
-        user.set_host(parv[0])
+        user.hostname = parv[0]
     end
 
     # Handles an incoming CHGHOST
@@ -346,7 +340,7 @@ module Protocol::Unreal
     def irc_chghost(origin, parv)
         user = User.users[parv[0]]
 
-        user.set_host(parv[1])
+        user.hostname = parv[1]
     end
 
     # Handles an incoming EOS (end of synch)
@@ -354,7 +348,9 @@ module Protocol::Unreal
     # no params
     #
     def irc_eos(origin, parv)
-        delta = 0 # XXX - Time.now - $state[:bursting]
+        log.debug $state[:bursting].inspect
+
+        delta = Time.now - $state[:bursting]
         $state[:bursting] = false
 
         $eventq.post(:end_of_burst, delta)
