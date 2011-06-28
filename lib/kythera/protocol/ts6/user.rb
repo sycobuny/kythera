@@ -14,7 +14,8 @@ class User
     @@user_modes = { 'a' => :administrator,
                      'i' => :invisible,
                      'o' => :operator,
-                     'w' => :wallop }
+                     'w' => :wallop,
+                     'D' => :deaf }
 
     # The user's IP address
     attr_reader :ip

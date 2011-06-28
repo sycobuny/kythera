@@ -69,7 +69,7 @@ class Shrike < Service
 
         # Introduce our client to the network
         @user = @uplink.introduce_user(@config.nickname, @config.username,
-                                       @config.hostname, @config.realname)
+                                       @config.hostname, @config.realname, 'Do')
 
         # Join our configuration channel
         $eventq.handle(:end_of_burst) do

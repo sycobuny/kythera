@@ -67,7 +67,7 @@ application will utilize to introduce your clients and to send events your way:
             # You should also introduce your clients to the uplink here. This
             # method returns your User object.
             #
-            @user = @uplink.introduce_user(nick, username, hostname, realname)
+            @user = @uplink.introduce_user(nick, user, host, real, modes)
         end
 
         public

@@ -46,17 +46,21 @@ module Protocol::TS6
     end
 
     # UID <NICK> 1 <TS> +<UMODES> <USER> <HOST> <IP> <UID> :<REAL>
-    def send_uid(nick, uname, host, real)
-        ts  = Time.now.to_i
-        ip  = @config.bind_host || '255.255.255.255'
-        id  = @@current_uid
-        uid = "#{@config.sid}#{id}"
+    def send_uid(nick, uname, host, real, modes = '')
+        ts    = Time.now.to_i
+        ip    = @config.bind_host || '255.255.255.255'
+        id    = @@current_uid
+        uid   = "#{@config.sid}#{id}"
+        modes = "+#{modes}"
 
         @@current_uid.next!
 
-        @sendq << "UID #{nick} 1 #{ts} + #{uname} #{host} #{ip} #{uid} :#{real}"
+        str  = "UID #{nick} 1 #{ts} #{modes} #{uname} #{host} #{ip} #{uid} :"
+        str += real
 
-        User.new(nil, nick, uname, host, ip, real, '+', uid, ts, @logger)
+        @sendq << str
+
+        User.new(nil, nick, uname, host, ip, real, modes, uid, ts, @logger)
     end
 
     # :UID PRIVMSG <TARGET_UID> :<MESSAGE>
