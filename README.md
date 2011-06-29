@@ -74,23 +74,20 @@ required for database management. These gems are widely available and should
 not be a problem.
 
 If you want to run the unit tests you'll also need `riot ~> 0.12` and run
-`rake test` from your terminal.
+`rake test` from your terminal. If you want to run the benchmarks you'll
+need `benchmark_suite ~> 0.8.0` and probably `ffi ~> 1.0.9`.
 
 ## Credits ##
 
 This application is completely original. I'm sure to receive patches from other
 contributors from time to time, and this will be indicated in SCM commits.
-Presently, all major development is done by me:
 
-  * rakaur, Eric Will <rakaur@malkier.net>
-
-Thanks to testers, contributors, etc:
-
-  * sycobuny, Stephen Belcher <sycobuny@malkier.net>
-  * rintaun, Matt Lanigan <rintaun@projectxero.net>
-  * xiphias, Michael Rodriguez <xiphias@khaydarin.net>
-  * andrew, Andrew Herbig <goforit7arh@gmail.com>
-
+    Lead Developer  rakaur    Eric Will          rakaur@malkier.net
+    Developer       andrew    Andrew Herbig      goforit7arh@gmail.com
+    Database        sycobuny  Stephen Belcher    sycobuny@malkier.net
+    Contributor     xiphias   Michael Rodriguez  xiphias@khaydarin.net
+    Tester          rintaun   Matt Lanigan       rintaun@projectxero.net
+    
 ## Contact and Support ##
 
 I'm not promising and fast and hard support, but I'll try to do my best. This
