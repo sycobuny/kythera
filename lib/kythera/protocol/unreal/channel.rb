@@ -11,17 +11,44 @@ require 'kythera'
 
 # This reopens the base Channel class in `kythera/channel.rb`
 class Channel
-    # Unreal has owner, admin, and halfop as well as operator and voice.
+    # Unreal has all sorts of crazy channel modes
     @@status_modes = { 'q' => :owner,
                        'a' => :admin,
                        'o' => :operator,
                        'h' => :halfop,
                        'v' => :voice }
 
-    # Unreal has except and invex as well as ban
     @@list_modes = { 'b' => :ban,
                      'e' => :except,
                      'I' => :invex }
+
+    @@param_modes = { 'f' => :flood_protection,
+                      'j' => :join_throttle,
+                      'k' => :keyed,
+                      'l' => :limited,
+                      'L' => :limit_channel }
+
+    @@bool_modes = { 'A' => :admin_only,
+                     'c' => :no_ansi,
+                     'C' => :no_ctcp,
+                     'G' => :censored,
+                     'i' => :invite_only,
+                     'M' => :registered_moderated,
+                     'm' => :moderated,
+                     'N' => :no_nick_changes,
+                     'n' => :no_external,
+                     'O' => :ircops_only,
+                     'p' => :private,
+                     'Q' => :no_kick,
+                     'r' => :registered,
+                     'R' => :registered_only,
+                     'S' => :strip_colors,
+                     's' => :secret,
+                     't' => :topic_lock,
+                     'T' => :no_notice,
+                     'u' => :auditorium,
+                     'V' => :no_invite,
+                     'z' => :ssl_only }
 
     # The channel's timestamp
     attr_reader :timestamp

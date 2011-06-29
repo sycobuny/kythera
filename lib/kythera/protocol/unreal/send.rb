@@ -52,11 +52,15 @@ module Protocol::Unreal
         @sendq << "PONG #{$config.me.name} :#{param}"
     end
 
-    # NICK nick hopcount timestamp username hostname server servicestamp :realname
+    # NICK nick hopcount timestamp username
+    #      hostname server servicestamp :realname
     def send_nick(nick, user, host, real)
         ts = Time.now.to_i
 
-        @sendq << "NICK #{nick} 1 #{ts} #{user} #{host} #{$config.me.name} 0 :#{real}"
+        str  = "NICK #{nick} 1 #{ts} #{user} #{host} #{$config.me.name} 0 :"
+        str += real
+
+        @sendq << str
 
         User.new(nil, nick, user, host, real, ts, @logger)
     end
@@ -79,5 +83,10 @@ module Protocol::Unreal
     # :user QUIT :reason
     def send_quit(nick, reason)
         @sendq << ":#{nick} QUIT :#{reason}"
+    end
+
+    # :user MODE target modechange
+    def send_mode(nick, target, change)
+        @sendq << ":#{nick} MODE #{target} #{change}"
     end
 end
