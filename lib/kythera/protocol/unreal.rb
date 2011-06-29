@@ -40,7 +40,7 @@ module Protocol::Unreal
     # @param [String] real user's realname / gecos
     #
     def introduce_user(nick, user, host, real, modes = '')
-        modes = "+#{modes}"
+        modes = "+S#{modes}" # Services protection + introduce_user#modes
 
         u = send_nick(nick, user, host, real)
         u.parse_modes(modes)
