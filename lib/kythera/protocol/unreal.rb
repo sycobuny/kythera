@@ -39,8 +39,15 @@ module Protocol::Unreal
     # @param [String] host user's hostname
     # @param [String] real user's realname / gecos
     #
-    def introduce_user(nick, user, host, real)
-        send_nick(nick, user, host, real)
+    def introduce_user(nick, user, host, real, modes = '')
+        modes = "+#{modes}"
+
+        u = send_nick(nick, user, host, real)
+        u.parse_modes(modes)
+
+        send_mode(nick, nick, modes)
+
+        u
     end
 
     # Sends a PRIVMSG to a user

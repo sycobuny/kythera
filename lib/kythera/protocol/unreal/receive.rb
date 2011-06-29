@@ -284,7 +284,7 @@ module Protocol::Unreal
     #
     def irc_mode(origin, parv)
         if user = User.users[parv[0]]
-            user.modes = parv[1][REMOVE_FIRST] # XXX
+            user.parse_modes(parv[1])
         else
             user, channel = find_user_and_channel(origin, parv[0], :MODE)
             unless user and channel
@@ -345,11 +345,11 @@ module Protocol::Unreal
     # no params
     #
     def irc_eos(origin, parv)
-        log.debug $state[:bursting].inspect
+        if $state[:bursting]
+            delta = Time.now - $state[:bursting]
+            $state[:bursting] = false
 
-        delta = Time.now - $state[:bursting]
-        $state[:bursting] = false
-
-        $eventq.post(:end_of_burst, delta)
+            $eventq.post(:end_of_burst, delta)
+        end
     end
 end

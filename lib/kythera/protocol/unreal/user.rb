@@ -17,6 +17,35 @@ class User
     # The user's modes
     attr_accessor :modes
 
+    # Unreal's user modes
+    @@user_modes = { 'A' => :server_admin,
+                     'a' => :services_admin,
+                     'B' => :bot,
+                     'C' => :co_admin,
+                     'd' => :deaf,
+                     'G' => :censored,
+                     'g' => :oper_talk,
+                     'H' => :hide_ircop,
+                     'h' => :helper,
+                     'i' => :invisible,
+                     'N' => :netadmin,
+                     'O' => :local_oper,
+                     'o' => :global_oper,
+                     'p' => :hide_whois_channels,
+                     'q' => :unkickable,
+                     'R' => :registered_privmsg,
+                     'r' => :registered,
+                     'S' => :service,
+                     's' => :receives_snotices,
+                     'T' => :no_ctcp,
+                     't' => :vhost,
+                     'V' => :webtv,
+                     'v' => :dcc_infection_notices,
+                     'W' => :see_whois,
+                     'w' => :wallop,
+                     'x' => :hidden_host,
+                     'z' => :ssl }
+
     # Creates a new user and adds it to the list keyed by nick
     def initialize(server, nick, user, host, real, ts, logger)
         @server    = server
@@ -24,8 +53,8 @@ class User
         @username  = user
         @hostname  = host
         @realname  = real
-        @modes     = nil
-        @timestamp = ts.to_i
+        @timestamp = ts
+        @modes     = []
         @logger    = nil
 
         @status_modes = {}
@@ -38,6 +67,14 @@ class User
         log.debug "new user: #{nick}!#{user}@#{host} (#{real})"
 
         $eventq.post(:user_added, self)
+    end
+
+    # Is this user an IRC operator?
+    #
+    # @return [Boolean] true or false
+    #
+    def operator?
+        @modes.include?(:global_oper)
     end
 
     def hostname=(host)

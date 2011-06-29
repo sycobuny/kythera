@@ -19,7 +19,9 @@ class Server
 
         self.logger = logger
 
-        log.error "new server replacing server with same name!" if @@servers[name]
+        if @@servers[name]
+            log.error "new server replacing server with same name!"
+        end
 
         @@servers[name] = self
 
