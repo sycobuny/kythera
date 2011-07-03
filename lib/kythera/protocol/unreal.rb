@@ -15,6 +15,7 @@ require 'kythera/protocol/unreal/server'
 require 'kythera/protocol/unreal/receive'
 require 'kythera/protocol/unreal/user'
 
+# Implements Unreal protocol-specific methods
 module Protocol::Unreal
     # Removes the first character of the string
     REMOVE_FIRST = 1 .. -1

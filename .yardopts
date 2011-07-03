@@ -1,4 +1,5 @@
 --output yardoc/
+--exclude lib/kythera/securerandom.rb
 -
 doc/events.md
 doc/extensions.md

@@ -77,6 +77,10 @@ class User
         @modes.include?(:global_oper)
     end
 
+    # Sets the User's hostname for things like CHGHOST
+    #
+    # @param [String] host the hostname to use
+    #
     def hostname=(host)
         log.debug "changing #{@nickname}'s host from #{@hostname} to #{host}"
         @hostname = host

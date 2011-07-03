@@ -16,6 +16,7 @@ module Protocol::Unreal
     # Handles an incoming PASS
     #
     # parv[0] -> password
+    #
     def irc_pass(origin, parv)
         # Start the burst timer
         $state[:bursting] = Time.now
@@ -36,6 +37,7 @@ module Protocol::Unreal
     #   parv[0] -> server name
     #   parv[1] -> hops
     #   parv[2] -> description
+    #
     def irc_server(origin, parv)
         # No origin means that we're handshaking, so this must be our uplink.
         unless origin
@@ -66,6 +68,7 @@ module Protocol::Unreal
     #
     # parv[0] -> source server
     # parv[1] -> optional destination server (which is us)
+    #
     def irc_ping(origin, parv)
         send_pong(parv[0])
     end
@@ -84,6 +87,7 @@ module Protocol::Unreal
     #   parv[5] -> server
     #   parv[6] -> servicestamp
     #   parv[7] -> realname
+    #
     def irc_nick(origin, parv)
         if origin
             unless user = User.users[origin]
@@ -341,9 +345,6 @@ module Protocol::Unreal
     end
 
     # Handles an incoming EOS (end of synch)
-    #
-    # no params
-    #
     def irc_eos(origin, parv)
         if $state[:bursting]
             delta = Time.now - $state[:bursting]
