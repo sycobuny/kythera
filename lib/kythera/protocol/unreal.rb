@@ -91,6 +91,11 @@ module Protocol::Unreal
         send_sjoin(channel.name, channel.timestamp, user.nickname)
 
         channel.add_user(user)
+
+        user.add_status_mode(channel, :operator)
+
+        $eventq.post(:mode_added_on_channel,
+                    :operator, user, channel)
     end
 
     # Makes one of our clients send a QUIT

@@ -67,14 +67,15 @@ class Shrike < Service
 
         log.info "shrike module loaded (version #{VERSION})"
 
-        # Introduce our client to the network
-        @user = @uplink.introduce_user(@config.nickname, @config.username,
-                                       @config.hostname, @config.realname, 'Do')
-
         # Join our configuration channel
         $eventq.handle(:end_of_burst) do
-            @uplink.join(@user, @config.channel)
-        end if @config.channel
+            # Introduce our client to the network
+            @user = @uplink.introduce_user(@config.nickname, @config.username,
+                                           @config.hostname, @config.realname,
+                                           'o')
+
+            @uplink.join(@user, @config.channel) if @config.channel
+        end
     end
 
     public

@@ -193,6 +193,9 @@ class Uplink
 
             log.debug "-> #{line}"
 
+            # don't do anything if the line is empty
+            next if line.empty?
+
             if line[0].chr == ':'
                 # Remove the origin from the line, and eat the colon
                 origin, line = line.split(RE_SPACE, 2)
@@ -204,7 +207,7 @@ class Uplink
             tokens, args = line.split(' :', 2)
             parv = tokens.split(RE_SPACE)
             cmd  = parv.delete_at(0)
-            parv << args
+            parv << args unless args.nil?
 
             # Some IRCds have commands like '&' that we translate for methods
             cmd = TOKENS[cmd] if defined?(TOKENS)
