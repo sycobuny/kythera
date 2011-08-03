@@ -20,6 +20,7 @@ module Database
     #
     class User < Sequel::Model
         one_to_many :user_flags
+        one_to_many :channel_user_flags
 
         plugin :validation_helpers
 
@@ -75,62 +76,91 @@ module Database
 
         # Returns user flags as Symbols instead of objects
         #
-        # @return [Array] Symbols for all flags
+        # @return [Array] symbols for all flags
         #
         def flags
+            # iterate each UserFlag object and just cache the "flag" member as a
+            # Symbol, cause that's what we'll need most frequently
             @flags ||= user_flags.collect { |uf| uf.flag.to_sym }
         end
 
         # Adds flags to a User
         #
-        # @param [Symbol] a flag to add
-        # @return [Array] the flags sent to the method
+        # @param [Symbol,String] a flag or flags to add
         #
         def add_flags(*flags_to_add)
-            $db.transaction do
-                flags_to_add.each do |flag|
-                    next if flags.include?(flag.to_sym)
+            # backup our cache because we're going to be editing it directly,
+            # and we want to ensure we can rollback if problems arise
+            uf = flags.dup
 
-                    user_flag = UserFlag.new
-                    user_flag.flag = flag.to_s
+            begin
+                # transaction safety!
+                $db.transaction do
+                    flags_to_add.each do |flag|
+                        # don't bother adding a flag we've already got
+                        next if flags.include?(flag.to_sym)
 
-                    flags << flag.to_sym
-                    add_user_flag(user_flag)
+                        # otherwise, make a new ChannelFlag object and set it up
+                        user_flag = UserFlag.new
+                        user_flag.flag = flag.to_s
+
+                        # add the flags to our cache and the DB
+                        flags << flag.to_sym
+                        add_user_flag(user_flag)
+                    end
                 end
+            rescue Exception => e
+                # rollback changes to our cache if we couldn't save, and then
+                # reraise cause we don't know for sure how to proceed from here
+                @flags = uf
+                raise e
             end
         end
 
         # Removes flags from a User
-        # @param [Symbol] a flag to remove
-        # @return [Array] the flags sent to the method
+        #
+        # @param [Symbol,String] a flag or flags to remove
         #
         def remove_flags(*flags_to_rem)
-            uf = user_flags.to_a
+            # backup our cache because we're going to be editing it directly,
+            # and we want to ensure we can rollback if problems arise
+            uf = flags.dup
 
-            $db.transaction do
-                flags_to_rem.each do |flag|
-                    ftr = uf.find { |f| f.flag == flag.to_s }
-                    next unless ftr
+            begin
+                # transaction safety!
+                $db.transaction do
+                    flags_to_rem.each do |flag|
+                        # find the flag in the user_flags so we can get the
+                        # UserFlag object proper, not just a Symbol
+                        ftr = user_flags.find { |f| f.flag == flag.to_s }
+                        next unless ftr
 
-                    flags.delete_if { |f| f == flag.to_sym }
-                    ftr.delete
+                        # delete the element in our cached array as well as in
+                        # the database
+                        flags.delete_if { |f| f == flag.to_sym }
+                        ftr.delete
+                    end
                 end
+            rescue Exception => e
+                # rollback changes to our cache if we couldn't save, and then
+                # reraise cause we don't know for sure how to proceed from here
+                @flags = uf
+                raise e
             end
+        end
+
+        # Converts object to its database ID
+        #
+        # @return [Integer] database ID
+        #
+        def to_i
+            id
         end
     end
 
     # A user flag indicates a user is given elevated privileges
     class UserFlag < Sequel::Model
         many_to_one :user
-
-        # Converts to a String
-        def to_s
-            flag
-        end
-
-        # Converts to a Symbol
-        def to_sym
-            flag.to_sym
-        end
+        include GenericFlag
     end
 end
