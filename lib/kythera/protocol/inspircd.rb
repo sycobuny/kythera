@@ -1,21 +1,22 @@
 #
 # kythera: services for IRC networks
-# lib/kythera/protocol/ts6.rb: implements the TS6 protocol
+# lib/kythera/protocol/inspircd.rb: implements the InspIRCd protocol
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
+# Copyright (c) 2011 Andrew Herbig <goforit7arh@gmail.com>
 # Rights to this code are documented in doc/license.txt
 #
 
 require 'kythera'
 
-require 'kythera/protocol/ts6/channel'
-require 'kythera/protocol/ts6/send'
-require 'kythera/protocol/ts6/server'
-require 'kythera/protocol/ts6/receive'
-require 'kythera/protocol/ts6/user'
+require 'kythera/protocol/inspircd/channel'
+require 'kythera/protocol/inspircd/send'
+require 'kythera/protocol/inspircd/server'
+require 'kythera/protocol/inspircd/receive'
+require 'kythera/protocol/inspircd/user'
 
-# Implements TS6 protocol-specific methods
-module Protocol::TS6
+# Implements InspIRCd protocol-specific methods
+module Protocol::InspIRCd
     # Removes the first character of the string
     REMOVE_FIRST = 1 .. -1
 
@@ -82,7 +83,7 @@ module Protocol::TS6
             end
         end
 
-        send_sjoin(channel.name, channel.timestamp, user.uid)
+        send_fjoin(channel.name, channel.timestamp, user.uid)
 
         channel.add_user(user)
 

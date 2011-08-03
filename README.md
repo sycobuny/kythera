@@ -53,6 +53,7 @@ IRCds. These include:
   * ircd-ratbox (tested with 2.2.9)
   * charybdis (tested with 3.2.1)
   * UnrealIRCd (tested with 3.2.8.1)
+  * InspIRCd (tested with 1.2.8)
 
 Other TS6-based IRCds may work. For now, the TS6 module only provides support
 for TS6-only networks. If you link a non-TS6 server, Kythera will ignore it.
