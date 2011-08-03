@@ -149,6 +149,9 @@ configure do
         #
         # Comment to disable
         channel '#kythera'
+
+        # The users that have special privileges with the service
+        sras :rakaur, :sycobuny
     end
 
     # This section of the configuration allows you to specify DNS blacklists to

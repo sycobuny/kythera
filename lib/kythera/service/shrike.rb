@@ -80,6 +80,16 @@ class Shrike < Service
 
     public
 
+    # Determines if someone is an SRA
+    #
+    # @param [String] nickname person to check
+    # @return [Boolean] true or false
+    #
+    def is_sra?(nickname)
+        @config.sras.include?(nickname)
+    end
+
+    # Called by the protocol module to handle commands sent to us
     def irc_privmsg(user, params)
         cmd = params.delete_at(0)
         meth = "do_#{cmd}".downcase.to_sym

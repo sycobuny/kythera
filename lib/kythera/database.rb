@@ -3,6 +3,7 @@
 # lib/kythera/database.rb: database routines
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
+# Copyright (c) 2011 Stephen Belcher <sycobuny@malkier.net>
 # Rights to this code are documented in doc/license.txt
 #
 

@@ -3,6 +3,7 @@
 # db/migrations/001_start.rb: create the database
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
+# Copyright (c) 2011 Stephen Belcher <sycobuny@malkier.net>
 # Rights to this code are documented in doc/license.txt
 #
 

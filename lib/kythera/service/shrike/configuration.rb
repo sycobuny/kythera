@@ -55,4 +55,10 @@ module Shrike::Configuration::Methods
     def channel(chan)
         self.channel = chan
     end
+
+    def sras(*args)
+        self.sras ||= []
+
+        args.each { |sra| self.sras << sra.to_s }
+    end
 end

@@ -13,19 +13,23 @@ class Shrike < Service
 
     # This is dangerous, and is only here for my testing purposes - XXX
     def do_raw(user, params)
-        return unless user.operator?
+        return unless is_sra?(user.nickname)
 
         @uplink.raw(params.join(' '))
     end
 
     # Extremely dangerous, this is here only for my testing purposes! - XXX
     def do_eval(user, params)
-        return unless user.operator?
+        return unless is_sra?(user.nickname)
 
         code = params.join(' ')
 
         result = eval(code)
 
         @uplink.privmsg(@user, @config.channel, "#{result.inspect}")
+    end
+
+    # Registers a username or channel
+    def do_register(user, params)
     end
 end
