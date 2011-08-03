@@ -69,10 +69,16 @@ class Shrike < Service
 
         # Join our configuration channel
         $eventq.handle(:end_of_burst) do
+            if @uplink.config.protocol == :ts6
+                modes = 'oD'
+            else
+                modes = 'o'
+            end
+
             # Introduce our client to the network
             @user = @uplink.introduce_user(@config.nickname, @config.username,
                                            @config.hostname, @config.realname,
-                                           'o')
+                                           modes)
 
             @uplink.join(@user, @config.channel) if @config.channel
         end

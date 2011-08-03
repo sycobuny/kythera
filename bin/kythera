@@ -106,8 +106,9 @@ configure do
         network :malkier
 
         # The protocol that your ircd speaks for server-to-server links.
-        # For ircd-ratbox this is `ts6`, other IRCds may be supported
-        # in the future.
+        # For ircd-ratbox and charybdis this is `ts6`
+        # For UnrealIRCD this is `unreal`
+        # For InspIRCd this is `inspircd`
         #
         protocol :ts6
 
