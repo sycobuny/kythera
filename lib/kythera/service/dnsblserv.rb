@@ -14,28 +14,16 @@ require 'resolv'
 # Provides a DNSBL-checking service
 class DNSBLService < Service
     # Backwards-incompatible changes
-    V_MAJOR = 0
+    V_MAJOR = 1
 
     # Backwards-compatible changes
     V_MINOR = 0
 
     # Minor changes and bugfixes
-    V_PATCH = 1
+    V_PATCH = 0
 
     # String representation of our version..
     VERSION = "#{V_MAJOR}.#{V_MINOR}.#{V_PATCH}"
-
-    # Is this service enabled in the configuration?
-    #
-    # @return [Boolean] true or false
-    #
-    def self.enabled?
-        if $config.respond_to?(:dnsblserv) and $config.dnsblserv
-            true
-        else
-            false
-        end
-    end
 
     # Verify our configuration
     #
@@ -44,7 +32,7 @@ class DNSBLService < Service
     def self.verify_configuration
         c = $config.dnsblserv
 
-        if not c.blacklists or c.blacklists.empty?
+        if not c or not c.blacklists or c.blacklists.empty?
             false
         else
             true
@@ -68,7 +56,7 @@ class DNSBLService < Service
         # Number of users currently waiting to be checked
         @needs_checking = 0
 
-        log.info "dnsblserv module loaded (version #{VERSION})"
+        log.info "DNSBL Service loaded (version #{VERSION})"
 
         # We don't check users while we're bursting
         @bursting = true
@@ -160,3 +148,5 @@ module DNSBLService::Configuration::Methods
         self.delay = seconds
     end
 end
+
+$config.extend(DNSBLService::Configuration)

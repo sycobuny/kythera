@@ -11,6 +11,8 @@ require 'kythera'
 require 'kythera/service/shrike/commands'
 require 'kythera/service/shrike/configuration'
 
+$config.extend(Shrike::Configuration)
+
 # This service is designed to implement the functionality of Shrike IRC Services
 class Shrike < Service
     # For backwards-incompatible changes
@@ -28,18 +30,6 @@ class Shrike < Service
     # Our User object is visible for the Service API
     attr_reader :user
 
-    # Is this service enabled in the configuration?
-    #
-    # @return [Boolean] true or false
-    #
-    def self.enabled?
-        if $config.respond_to?(:shrike) and $config.shrike
-            true
-        else
-            false
-        end
-    end
-
     # Verify our configuration
     #
     # @return [Boolean] true or false
@@ -47,7 +37,7 @@ class Shrike < Service
     def self.verify_configuration
         c = $config.shrike
 
-        unless c.nickname and c.username and c.hostname and c.realname
+        unless c and c.nickname and c.username and c.hostname and c.realname
             false
         else
             true
@@ -65,7 +55,7 @@ class Shrike < Service
 
         @config = $config.shrike
 
-        log.info "shrike module loaded (version #{VERSION})"
+        log.info "Shrike Service loaded (version #{VERSION})"
 
         # Join our configuration channel
         $eventq.handle(:end_of_burst) do

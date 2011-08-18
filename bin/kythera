@@ -37,9 +37,7 @@ Dir.chdir File.expand_path('..', File.dirname(__FILE__))
 
 # The actual configuration begins here
 configure do
-    use Kythera::Configuration      # Base configuration
-    use Shrike::Configuration       # Configuration for the Shrike service
-    use DNSBLService::Configuration # Configuration for the DNSBL service
+    use Kythera::Configuration # Base configuration
 
     # This section of the configuration is dedicated to the general
     # behavior of the service as a whole.
@@ -107,7 +105,7 @@ configure do
 
         # The protocol that your ircd speaks for server-to-server links.
         # For ircd-ratbox and charybdis this is `ts6`
-        # For UnrealIRCD this is `unreal`
+        # For UnrealIRCd this is `unreal`
         # For InspIRCd this is `inspircd`
         #
         protocol :ts6
@@ -131,8 +129,11 @@ configure do
     # XXX abort "You really should read ALL of your configuration file!"
 
     # This section of the configuration describes the behavior of the Shrike
-    # service. If it is not specified or is empty, shrike is disabled.
+    # service. If it is not specified or is empty, shrike is disabled. If
+    # disabled, the configuration options will not parse.
     #
+    service :shrike # Comment to disable
+
     shrike_service do
         # The client's nickname on IRC
         nickname :X
@@ -159,8 +160,11 @@ configure do
     # check connecting users on the network against. These lists contain
     # addresses of known open proxy servers and other malicious things. This
     # service does not appear on the network as a client. If this section is not
-    # specified or is empty, the service is disabled.
+    # specified or is empty, the service is disabled. If disabled, the
+    # configuration options will not parse.
     #
+    service :dnsblserv # Comment to disable
+
     dnsbl_service do
         # The EFnetRBL is huge and very accurate
         # See http://rbl.efnet.org/

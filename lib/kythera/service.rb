@@ -43,7 +43,7 @@ class Service
     #
     def self.instantiate(uplink, logger)
         @@services_classes.each do |srv|
-            next unless srv.enabled? and srv.verify_configuration
+            next unless srv.verify_configuration
 
             s = srv.new(uplink, logger)
             @@services << s

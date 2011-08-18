@@ -44,7 +44,7 @@ require 'kythera/uplink'
 require 'kythera/user'
 
 # Require all of our services and extensions
-Dir.glob(['lib/kythera/service/*.rb', 'ext/*rb']) do |filepath|
+Dir.glob(['ext/*rb']) do |filepath|
     require filepath.split(File::SEPARATOR, 2)[-1]
 end
 
@@ -109,6 +109,24 @@ module Kythera::Configuration
 
     # Holds the settings for the uplink section
     attr_reader :uplinks
+
+    # Reports an error about an unknown directive
+    def method_missing(meth, *args, &block)
+       puts "kythera: unknown configuration directive '#{meth}' (ignored)"
+    end
+
+    # Loads a service module
+    #
+    # @param [Symbol] name name of service to load
+    #
+    def service(name)
+        begin
+            require "kythera/service/#{name}.rb"
+        rescue LoadError
+            puts "kythera: error loading Service '#{name}'"
+        end
+    end
+
 
     # Parses the `daemon` section of the configuration
     #
