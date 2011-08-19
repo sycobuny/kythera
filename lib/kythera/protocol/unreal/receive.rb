@@ -22,7 +22,7 @@ module Protocol::Unreal
         $state[:bursting] = Time.now
 
         if parv[0] != @config.receive_password.to_s
-            log.error "incorrect password received from `#{@config.name}`"
+            $log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
         end
     end
@@ -41,12 +41,12 @@ module Protocol::Unreal
     def irc_server(origin, parv)
         # No origin means that we're handshaking, so this must be our uplink.
         unless origin
-            server = Server.new(parv[0], @logger)
+            server = Server.new(parv[0])
 
             # Make sure their name matches what we expect
             unless parv[0] == @config.name
-                log.error "name mismatch from uplink"
-                log.error "#{parv[0]} != #{@config.name}"
+                $log.error "name mismatch from uplink"
+                $log.error "#{parv[0]} != #{@config.name}"
 
                 self.dead = true
 
@@ -55,11 +55,11 @@ module Protocol::Unreal
 
             server.description = parv[2]
 
-            log.debug "new server: #{parv[0]}"
+            $log.debug "new server: #{parv[0]}"
 
             $eventq.post(:server_added, server)
         else
-            server             = Server.new(parv[0], @logger)
+            server             = Server.new(parv[0])
             server.description = parv[2]
         end
     end
@@ -91,22 +91,22 @@ module Protocol::Unreal
     def irc_nick(origin, parv)
         if origin
             unless user = User.users[origin]
-                log.error "got nick change for non-existant nick: #{origin}"
+                $log.error "got nick change for non-existant nick: #{origin}"
                 return
             end
 
-            log.debug "nick change: #{user.nickname} -> #{parv[0]}"
+            $log.debug "nick change: #{user.nickname} -> #{parv[0]}"
 
             user.nickname = parv[0]
         else
             p = parv
 
             unless s = Server.servers[p[5]]
-                log.error "received NICK from unknown server: #{parv[5]}"
+                $log.error "received NICK from unknown server: #{parv[5]}"
                 return
             end
 
-            u = User.new(s, p[0], p[3], p[4], p[7], p[2], @logger)
+            u = User.new(s, p[0], p[3], p[4], p[7], p[2])
 
             s.add_user(u)
         end
@@ -118,13 +118,13 @@ module Protocol::Unreal
     #
     def irc_quit(origin, parv)
         unless user = User.users.delete(origin)
-            log.error "received QUIT for unknown nick: #{origin}"
+            $log.error "received QUIT for unknown nick: #{origin}"
             return
         end
 
         user.server.delete_user(user)
 
-        log.debug "user quit: #{user.nickname}"
+        $log.debug "user quit: #{user.nickname}"
     end
 
     # Handles an incoming SJOIN (channel burst)
@@ -147,7 +147,7 @@ module Protocol::Unreal
                 channel.timestamp = their_ts
             end
         else
-            channel = Channel.new(parv[1], parv[0], @logger)
+            channel = Channel.new(parv[1], parv[0])
         end
 
         # Parse channel modes
@@ -206,7 +206,7 @@ module Protocol::Unreal
             end
 
             unless user = User.users[nick]
-                log.error "got non-existant nick in SJOIN: #{nick}"
+                $log.error "got non-existant nick in SJOIN: #{nick}"
                 next
             end
 

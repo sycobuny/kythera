@@ -10,8 +10,6 @@ require 'kythera'
 
 # This is just a base class. All protocol module should monkeypatch this.
 class User
-    include Loggable
-
     # A list of all users. The protocol module should decide what the key is.
     @@users = {}
 
@@ -50,17 +48,15 @@ class User
     attr_reader :status_modes
 
     # Creates a new user. Should be patched by the protocol module.
-    def initialize(server, nick, user, host, real, umodes, logger)
+    def initialize(server, nick, user, host, real, umodes)
         @server   = server
         @nickname = nick
         @username = user
         @hostname = host
         @realname = real
         @modes    = []
-        @logger   = nil
 
         @status_modes = {}
-        self.logger   = logger
 
         # Do our user modes
         parse_modes(umodes)
@@ -111,7 +107,7 @@ class User
                     @modes.delete(mode)
                 end
 
-                log.debug "mode #{action}: #{self} -> #{mode}"
+                $log.debug "mode #{action}: #{self} -> #{mode}"
             end
 
             # Post an event for it
@@ -131,7 +127,7 @@ class User
     def add_status_mode(channel, mode)
         (@status_modes[channel] ||= []) << mode
 
-        log.debug "status mode added: #{@nickname}/#{channel} -> #{mode}"
+        $log.debug "status mode added: #{@nickname}/#{channel} -> #{mode}"
     end
 
     # Deletes a status mode for this user on a particular channel
@@ -141,15 +137,15 @@ class User
     #
     def delete_status_mode(channel, mode)
         unless @status_modes[channel]
-            log.warn "cannot remove mode from a channel with no known modes"
-            log.warn "#{channel} -> #{mode}"
+            $log.warn "cannot remove mode from a channel with no known modes"
+            $log.warn "#{channel} -> #{mode}"
 
             return
         end
 
         @status_modes[channel].delete(mode)
 
-        log.debug "status mode deleted: #{@nickname}/#{channel} -> #{mode}"
+        $log.debug "status mode deleted: #{@nickname}/#{channel} -> #{mode}"
     end
 
     # Deletes all status modes for given channel
@@ -158,8 +154,8 @@ class User
     #
     def clear_status_modes(channel)
         unless @status_modes[channel]
-            log.warn "cannot clear modes from a channel with no known modes"
-            log.warn "#{channel} -> clear all modes"
+            $log.warn "cannot clear modes from a channel with no known modes"
+            $log.warn "#{channel} -> clear all modes"
 
             return
         end

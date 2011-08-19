@@ -9,8 +9,6 @@
 require 'kythera'
 
 class Kythera
-    include Loggable
-
     # Gets the ball rolling...
     def initialize
         puts "#{ME}: version #{VERSION} [#{RUBY_PLATFORM}]"
@@ -29,7 +27,6 @@ class Kythera
         willfork = RUBY_PLATFORM =~ /win32/i ? false : true
         wd       = Dir.getwd
         @uplink  = nil
-        @logger  = nil
 
         # Do command-line options
         opts = OptionParser.new
@@ -63,7 +60,7 @@ class Kythera
             puts "#{ME}: warning: all activity will be logged in the clear"
         end
 
-        self.logger = nil unless logging
+        Log.logger = nil unless logging
 
         # Are we already running?
         check_running
@@ -71,17 +68,17 @@ class Kythera
         # Time to fork...
         if willfork
             daemonize(wd)
-            self.logger = Logger.new('var/kythera.log', 'weekly') if logging
+            Log.logger = Logger.new('var/kythera.log', 'weekly') if logging
         else
             puts "#{ME}: pid #{Process.pid}"
             puts "#{ME}: running in foreground mode from #{wd}"
 
             # Foreground logging
-            self.logger = Logger.new($stdout) if logging
+            Log.logger = Logger.new($stdout) if logging
         end
 
-        self.log_level = $config.me.logging if logging
-        $db.loggers << @logger if debug
+        Log.log_level = $config.me.logging if logging
+        $db.loggers << $log if debug
 
         # Write a pid file
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
@@ -140,19 +137,19 @@ class Kythera
         Service.services.clear
 
         if @uplink
-            log.debug "current uplink failed, trying next"
+           $log.debug "current uplink failed, trying next"
 
             curruli  = $config.uplinks.find_index(@uplink.config)
             curruli += 1
             curruli  = 0 if curruli > ($config.uplinks.length - 1)
 
-            $eventq = EventQueue.new(@logger)
-            @uplink = Uplink.new($config.uplinks[curruli], @logger)
+            $eventq = EventQueue
+            @uplink = Uplink.new($config.uplinks[curruli])
 
             sleep $config.me.reconnect_time
         else
-            $eventq = EventQueue.new(@logger)
-            @uplink = Uplink.new($config.uplinks[0], @logger)
+            $eventq = EventQueue.new
+            @uplink = Uplink.new($config.uplinks[0])
         end
 
         @uplink.connect
@@ -222,7 +219,7 @@ class Kythera
 
     # Cleans up before exiting
     def exit_app
-        @logger.close if @logger
+        $log.close if $log
         File.delete 'var/kythera.pid'
         exit
     end

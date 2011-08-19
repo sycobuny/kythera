@@ -12,8 +12,6 @@ require 'kythera'
 # For the full documentation see `doc/extensions.md`
 #
 class Service
-    include Loggable
-
     # A list of all services classes
     @@services_classes = []
 
@@ -39,30 +37,26 @@ class Service
     # Instantiate all of our services
     #
     # @param [Uplink] uplink the Uplink to pass to the services
-    # @param [Logger] logger the logger to pass to the services
     #
-    def self.instantiate(uplink, logger)
+    def self.instantiate(uplink)
         @@services_classes.each do |srv|
             next unless srv.verify_configuration
 
-            s = srv.new(uplink, logger)
+            s = srv.new(uplink)
             @@services << s
         end
     end
 
     # This should never be called except from a subclass, and only exists
     # as a guide for arguments.
-    def initialize(uplink, logger)
+    def initialize(uplink)
         @uplink = uplink
-        @logger = nil
-
-        self.logger = logger
     end
 
     private
 
     # You must override this or your service doesn't do too much huh?
     def irc_privmsg(user, params)
-        log.debug "I'm a Service that didn't override irc_privmsg!"
+        $log.debug "I'm a Service that didn't override irc_privmsg!"
     end
 end

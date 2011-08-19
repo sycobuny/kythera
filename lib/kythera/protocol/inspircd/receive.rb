@@ -27,8 +27,8 @@ module Protocol::InspIRCd
             # However this is a TS5 introduction, and we only support TS6-only
             # networks, so spit out a warning and ignore it.
             #
-            log.warn 'got non-TS6 server introduction on TS6-only network:'
-            log.warn "#{parv[0]} (#{parv[2]})"
+            $log.warn 'got non-TS6 server introduction on TS6-only network:'
+            $log.warn "#{parv[0]} (#{parv[2]})"
 
             return
         end
@@ -37,16 +37,16 @@ module Protocol::InspIRCd
         server = nil
 
         if parv[1] != @config.receive_password
-            log.error "incorrect password received from `#{@config.name}`"
+            $log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
         else
-            server = Server.new(parv[3], @logger)
+            server = Server.new(parv[3])
         end
 
         # Make sure their name matches what we expect
         unless parv[0] == @config.name
-            log.error "name mismatch from uplink"
-            log.error "#{parv[0]} != #{@config.name}"
+            $log.error "name mismatch from uplink"
+            $log.error "#{parv[0]} != #{@config.name}"
 
             self.dead = true
 
@@ -56,7 +56,7 @@ module Protocol::InspIRCd
         server.name        = parv[0]
         server.description = parv[4]
 
-        log.debug "new server: #{parv[0]}"
+        $log.debug "new server: #{parv[0]}"
 
         $eventq.post(:server_added, server)
     end
@@ -75,11 +75,11 @@ module Protocol::InspIRCd
         ts_delta = parv[0].to_i - Time.now.to_i
 
         if ts_delta >= 60
-            log.warn "#{@config.name} has excessive TS delta"
-            log.warn "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            $log.warn "#{@config.name} has excessive TS delta"
+            $log.warn "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
         elsif ts_delta >= 300
-            log.error "#{@config.name} TS delta exceeds five minutes"
-            log.error "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            $log.error "#{@config.name} TS delta exceeds five minutes"
+            $log.error "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
             self.dead = true
         end
     end
@@ -112,12 +112,11 @@ module Protocol::InspIRCd
         p = parv
 
         unless s = Server.servers[origin]
-            log.error "got UID from unknown SID: #{origin}"
+            $log.error "got UID from unknown SID: #{origin}"
             return
         end
 
-        u = User.new(s, p[2], p[5], p[4], p[6], p[-1], p[8], p[0], p[1],
-                     @logger)
+        u = User.new(s, p[2], p[5], p[4], p[6], p[-1], p[8], p[0], p[1])
 
         s.add_user(u)
     end
@@ -142,7 +141,7 @@ module Protocol::InspIRCd
                 channel.timestamp = their_ts
             end
         else
-            channel = Channel.new(parv[0], parv[1], @logger)
+            channel = Channel.new(parv[0], parv[1])
         end
 
         # Parse channel modes
@@ -166,7 +165,7 @@ module Protocol::InspIRCd
                 # Maybe it's a nickname?
                 user = User.users.values.find { |u| u.nickname == uid }
                 unless user
-                    log.error "got non-existant UID in SJOIN: #{uid}"
+                    $log.error "got non-existant UID in SJOIN: #{uid}"
                     next
                 end
             end
@@ -259,7 +258,7 @@ module Protocol::InspIRCd
                 channel.parse_modes(modes, params)
             else
                 unless user = User.users[parv[0]]
-                    log.debug "Got FMODE message for unknown UID: #{parv[0]}"
+                    $log.debug "Got FMODE message for unknown UID: #{parv[0]}"
                     return
                 end
 

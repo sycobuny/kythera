@@ -10,8 +10,6 @@ require 'kythera'
 
 # Represents the interface to the remote IRC server
 class Uplink
-    include Loggable
-
     # The configuration information
     attr_accessor :config
 
@@ -19,15 +17,12 @@ class Uplink
     attr_reader :socket
 
     # Creates a new Uplink and includes the protocol-specific methods
-    def initialize(config, logger)
+    def initialize(config)
         @config    = config
         @connected = false
         @recvq     = []
         @sendq     = []
         @socket    = nil
-        @logger    = nil
-
-        self.logger = logger
 
         # Set up some event handlers
         $eventq.handle(:socket_readable) { read  }
@@ -35,10 +30,10 @@ class Uplink
         $eventq.handle(:recvq_ready)     { parse }
 
         $eventq.handle(:connected) { send_handshake }
-        $eventq.handle(:connected) { Service.instantiate(self, @logger) }
+        $eventq.handle(:connected) { Service.instantiate(self) }
 
         $eventq.handle(:end_of_burst) do |delta|
-            log.info "finished synching to network in #{delta}s"
+            $log.info "finished synching to network in #{delta}s"
         end
 
         # Include the methods for the protocol we're using
@@ -94,7 +89,7 @@ class Uplink
     #
     def dead=(bool)
         if bool
-            log.info "lost connection to #{@config.name}:#{@config.port}"
+            $log.info "lost connection to #{@config.name}:#{@config.port}"
 
             $eventq.post(:disconnected)
 
@@ -108,17 +103,17 @@ class Uplink
 
     # Connects to the uplink using the information in `@config`
     def connect
-        log.info "connecting to #{@config.host}:#{@config.port}"
+        $log.info "connecting to #{@config.host}:#{@config.port}"
 
         begin
             @socket = TCPSocket.new(@config.host, @config.port,
                                     @config.bind_host, @config.bind_port)
         rescue Exception => err
-            log.error "connection failed: #{err}"
+            $log.error "connection failed: #{err}"
             self.dead = true
             return
         else
-            log.info "successfully connected to #{@config.name}:#{@config.port}"
+            $log.info "successfully connected to #{@config.name}:#{@config.port}"
 
             @connected = true
 
@@ -140,7 +135,7 @@ class Uplink
         end
 
         if not data or data.empty?
-            log.error "read error from #{@config.name}: #{err}" if err
+            $log.error "read error from #{@config.name}: #{err}" if err
             self.dead = true
             return
         end
@@ -165,14 +160,14 @@ class Uplink
         begin
             # Use shift because we need it to fall off immediately
             while line = @sendq.shift
-                log.debug "<- #{line}"
+                $log.debug "<- #{line}"
                 line += "\r\n"
                 @socket.write_nonblock(line)
             end
         rescue Errno::EAGAIN
             retry # XXX - maybe add this back to the writefds?
         rescue Exception => err
-            log.error "write error to #{@config.name}: #{err}"
+            $log.error "write error to #{@config.name}: #{err}"
             self.dead = true
             return
         end
@@ -191,7 +186,7 @@ class Uplink
         while line = @recvq.shift
             line.chomp!
 
-            log.debug "-> #{line}"
+            $log.debug "-> #{line}"
 
             # don't do anything if the line is empty
             next if line.empty?
@@ -219,7 +214,7 @@ class Uplink
             if self.respond_to?(cmd, true)
                 self.send(cmd, origin, parv)
             else
-                log.debug "no protocol handler for #{cmd.to_s.upcase}"
+                $log.debug "no protocol handler for #{cmd.to_s.upcase}"
             end
 
             # Fire off an event for extensions, etc

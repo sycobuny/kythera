@@ -79,7 +79,7 @@ module Protocol::InspIRCd
                 channel = chanobj
             else
                 # This is a nonexistant channel
-                channel = Channel.new(channel, Time.now.to_i, @logger)
+                channel = Channel.new(channel, Time.now.to_i)
             end
         end
 
@@ -107,11 +107,11 @@ module Protocol::InspIRCd
     # Finds a User and Channel or errors
     def find_user_and_channel(uid, name, command)
         unless user = User.users[uid]
-            log.error "got non-existant UID in #{command}: #{uid}"
+            $log.error "got non-existant UID in #{command}: #{uid}"
         end
 
         unless channel = Channel.channels[name]
-            log.error "got non-existant channel in #{command}: #{name}"
+            $log.error "got non-existant channel in #{command}: #{name}"
         end
 
         [user, channel]

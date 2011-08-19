@@ -24,10 +24,10 @@ module Protocol::TS6
         $state[:bursting] = Time.now
 
         if parv[0] != @config.receive_password
-            log.error "incorrect password received from `#{@config.name}`"
+            $log.error "incorrect password received from `#{@config.name}`"
             self.dead = true
         else
-            Server.new(parv[3], @logger)
+            Server.new(parv[3])
         end
     end
 
@@ -43,8 +43,8 @@ module Protocol::TS6
             # However this is a TS5 introduction, and we only support TS6-only
             # networks, so spit out a warning and ignore it.
             #
-            log.warn 'got non-TS6 server introduction on TS6-only network:'
-            log.warn "#{parv[0]} (#{parv[2]})"
+            $log.warn 'got non-TS6 server introduction on TS6-only network:'
+            $log.warn "#{parv[0]} (#{parv[2]})"
 
             return
         end
@@ -54,8 +54,8 @@ module Protocol::TS6
 
         # Make sure their name matches what we expect
         unless parv[0] == @config.name
-            log.error "name mismatch from uplink"
-            log.error "#{parv[0]} != #{@config.name}"
+            $log.error "name mismatch from uplink"
+            $log.error "#{parv[0]} != #{@config.name}"
 
             self.dead = true
 
@@ -65,7 +65,7 @@ module Protocol::TS6
         server.name        = parv[0]
         server.description = parv[2]
 
-        log.debug "new server: #{parv[0]}"
+        $log.debug "new server: #{parv[0]}"
 
         $eventq.post(:server_added, server)
     end
@@ -81,14 +81,14 @@ module Protocol::TS6
         ts_delta = parv[3].to_i - Time.now.to_i
 
         if parv[0].to_i < 6
-            log.error "#{@config.name} doesn't support TS6"
+            $log.error "#{@config.name} doesn't support TS6"
             self.dead = true
         elsif ts_delta >= 60
-            log.warn "#{@config.name} has excessive TS delta"
-            log.warn "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            $log.warn "#{@config.name} has excessive TS delta"
+            $log.warn "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
         elsif ts_delta >= 300
-            log.error "#{@config.name} TS delta exceeds five minutes"
-            log.error "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
+            $log.error "#{@config.name} TS delta exceeds five minutes"
+            $log.error "#{parv[3]} - #{Time.now.to_i} = #{ts_delta}"
             self.dead = true
         end
     end
@@ -116,7 +116,7 @@ module Protocol::TS6
     # parv[3] -> description
     #
     def irc_sid(origin, parv)
-        server             = Server.new(parv[2], @logger)
+        server             = Server.new(parv[2])
         server.name        = parv[0]
         server.description = parv[3]
 
@@ -130,14 +130,14 @@ module Protocol::TS6
     #
     def irc_squit(origin, parv)
         unless server = Server.servers.delete(parv[0])
-            log.error "received SQUIT for unknown SID: #{parv[0]}"
+            $log.error "received SQUIT for unknown SID: #{parv[0]}"
             return
         end
 
         # Remove all their users to comply with CAPAB QS
         server.users.each { |u| User.users.delete u.uid }
 
-        log.debug "server leaving: #{parv[0]}"
+        $log.debug "server leaving: #{parv[0]}"
     end
 
     # Handles an incoming UID (user introduction)
@@ -156,11 +156,11 @@ module Protocol::TS6
         p = parv
 
         unless s = Server.servers[origin]
-            log.error "got UID from unknown SID: #{origin}"
+            $log.error "got UID from unknown SID: #{origin}"
             return
         end
 
-        u = User.new(s, p[0], p[4], p[5], p[6], p[8], p[3], p[7], p[2], @logger)
+        u = User.new(s, p[0], p[4], p[5], p[6], p[8], p[3], p[7], p[2])
 
         s.add_user(u)
     end
@@ -174,11 +174,11 @@ module Protocol::TS6
         return unless parv.length == 2 # We don't want TS5 introductions
 
         unless user = User.users[origin]
-            log.error "got nick change for non-existant UID: #{origin}"
+            $log.error "got nick change for non-existant UID: #{origin}"
             return
         end
 
-        log.debug "nick change: #{user.nickname} -> #{parv[0]} [#{origin}]"
+        $log.debug "nick change: #{user.nickname} -> #{parv[0]} [#{origin}]"
 
         user.nickname = parv[0]
     end
@@ -189,13 +189,13 @@ module Protocol::TS6
     #
     def irc_quit(origin, parv)
         unless user = User.users.delete(origin)
-            log.error "received QUIT for unknown UID: #{origin}"
+            $log.error "received QUIT for unknown UID: #{origin}"
             return
         end
 
         user.server.delete_user(user)
 
-        log.debug "user quit: #{user.nickname} [#{user.uid}]"
+        $log.debug "user quit: #{user.nickname} [#{user.uid}]"
     end
 
     # Handles an incoming SJOIN (channel burst)
@@ -218,7 +218,7 @@ module Protocol::TS6
                 channel.timestamp = their_ts
             end
         else
-            channel = Channel.new(parv[1], parv[0], @logger)
+            channel = Channel.new(parv[1], parv[0])
         end
 
         # Parse channel modes
@@ -253,7 +253,7 @@ module Protocol::TS6
                 # Maybe it's a nickname?
                 user = User.users.values.find { |u| u.nickname == uid }
                 unless user
-                    log.error "got non-existant UID in SJOIN: #{uid}"
+                    $log.error "got non-existant UID in SJOIN: #{uid}"
                     next
                 end
             end
@@ -352,7 +352,7 @@ module Protocol::TS6
     #
     def irc_mode(origin, parv)
         unless user = User.users[parv[0]]
-            log.debug "Got MODE message for unknown UID: #{parv[0]}"
+            $log.debug "Got MODE message for unknown UID: #{parv[0]}"
             return
         end
 

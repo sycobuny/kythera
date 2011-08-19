@@ -47,15 +47,13 @@ class Shrike < Service
     # This is all we do for now :)
     #
     # @param [Uplink] uplink the interface to the IRC server
-    # @param [Logger] logger our logger object
     #
-    def initialize(uplink, logger)
-        # Prepare the logger and uplink
-        super
+    def initialize(uplink)
+        super # Prepare the uplink object
 
         @config = $config.shrike
 
-        log.info "Shrike Service loaded (version #{VERSION})"
+        $log.info "Shrike Service loaded (version #{VERSION})"
 
         # Join our configuration channel
         $eventq.handle(:end_of_burst) do

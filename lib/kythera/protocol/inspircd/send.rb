@@ -62,7 +62,7 @@ module Protocol::InspIRCd
 
         @sendq << str
 
-        User.new(nil, nick, user, host, ip, real, modes, uid, ts, @logger)
+        User.new(nil, nick, user, host, ip, real, modes, uid, ts)
     end
 
     # :<sid> FJOIN <channel> <timestamp> +<modes> <params> :<statusmodes,uuid>

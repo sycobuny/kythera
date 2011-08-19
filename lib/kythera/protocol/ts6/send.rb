@@ -60,7 +60,7 @@ module Protocol::TS6
 
         @sendq << str
 
-        User.new(nil, nick, uname, host, ip, real, modes, uid, ts, @logger)
+        User.new(nil, nick, uname, host, ip, real, modes, uid, ts)
     end
 
     # :UID PRIVMSG <TARGET_UID> :<MESSAGE>

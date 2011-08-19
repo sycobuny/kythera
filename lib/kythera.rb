@@ -30,7 +30,7 @@ require 'socket'
 require 'digest/sha2'
 
 # Require all of our files here and only here
-require 'kythera/loggable'
+require 'kythera/log'
 require 'kythera/channel'
 require 'kythera/database'
 require 'kythera/event'

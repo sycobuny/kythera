@@ -84,7 +84,7 @@ module Protocol::Unreal
                 channel = chanobj
             else
                 # This is a nonexistant channel
-                channel = Channel.new(channel, Time.now.to_i, @logger)
+                channel = Channel.new(channel, Time.now.to_i)
             end
         end
 
@@ -112,11 +112,11 @@ module Protocol::Unreal
     # Finds a User and Channel or errors
     def find_user_and_channel(nick, name, command)
         unless user = User.users[nick]
-            log.error "got non-existant nick in #{command}: #{nick}"
+            $log.error "got non-existant nick in #{command}: #{nick}"
         end
 
         unless channel = Channel.channels[name]
-            log.error "got non-existant channel in #{command}: #{name}"
+            $log.error "got non-existant channel in #{command}: #{name}"
         end
 
         [user, channel]

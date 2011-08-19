@@ -10,8 +10,6 @@ require 'kythera'
 
 # This is just a base class. All protocol module should monkeypatch this.
 class Channel
-    include Loggable
-
     # Standard IRC status cmodes
     @@status_modes = { 'o' => :operator,
                        'v' => :voice }
@@ -58,19 +56,16 @@ class Channel
     attr_reader :modes
 
     # Creates a new channel. Should be patched by the protocol module.
-    def initialize(name, logger)
+    def initialize(name)
         @name   = name
         @modes  = []
-        @logger = nil
-
-        self.logger = logger
 
         # Keyed by nickname by default
         @members = {}
 
         @@channels[name] = self
 
-        log.debug "new channel: #{@name}"
+        $log.debug "new channel: #{@name}"
 
         $eventq.post(:channel_added, self)
     end
@@ -137,7 +132,7 @@ class Channel
             end
 
             unless @@status_modes.include?(c)
-                log.debug "mode #{action}: #{self} -> #{mode} #{param}"
+                $log.debug "mode #{action}: #{self} -> #{mode} #{param}"
             end
 
             # XXX - list modes
@@ -163,7 +158,7 @@ class Channel
     def add_user(user)
         @members[user.nickname] = user
 
-        log.debug "user joined #{self}: #{user.nickname}"
+        $log.debug "user joined #{self}: #{user.nickname}"
 
         $eventq.post(:user_joined_channel, user, self)
     end
@@ -177,14 +172,14 @@ class Channel
 
         user.status_modes.delete(self)
 
-        log.debug "user parted #{self}: #{user.nickname} (#{@members.length})"
+        $log.debug "user parted #{self}: #{user.nickname} (#{@members.length})"
 
         $eventq.post(:user_parted_channel, user, self)
 
         if @members.length == 0
             @@channels.delete @name
 
-            log.debug "removing empty channel #{self}"
+            $log.debug "removing empty channel #{self}"
 
             $eventq.post(:channel_deleted, self)
         end
@@ -204,8 +199,8 @@ class Channel
     #
     def parse_status_mode(action, mode, target)
         unless user = User.users[target]
-            log.warn "cannot parse a status mode for an unknown user"
-            log.warn "#{target} -> #{mode} (#{self})"
+            $log.warn "cannot parse a status mode for an unknown user"
+            $log.warn "#{target} -> #{mode} (#{self})"
 
             return
         end

@@ -1,6 +1,6 @@
 #
 # kythera: services for IRC networks
-# lib/kythera/loggable.rb: instant logging, just include Loggable
+# lib/kythera$log.rb: a bit of tweaking for Logger
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
 # Rights to this code are documented in doc/license.txt
@@ -8,10 +8,12 @@
 
 require 'kythera'
 
-# A mixin to add easy logging to your class
-# Just `include Loggable` and call `self.logger=`
-#
-module Loggable
+# Application-wide logger
+$log = nil
+
+# Just a few helpers for logging with a Logger
+module Log
+
     # This class allows us to turn off logging easily
     class NilLogger
         include Singleton
@@ -42,6 +44,7 @@ module Loggable
         # @param [String] msg the actual log message
         #
         def call(severity, time, progname, msg)
+            severity = severity[0].chr
             datetime = time.strftime('%m/%d %H:%M:%S')
             progname = caller[3].split('/')[-1]
 
@@ -50,36 +53,31 @@ module Loggable
                 progname.gsub!(PN_RE,       '')
                 progname.gsub!('block in ', '')
 
-                "[%s] %s: %s\n" % [datetime, progname, msg]
+                "[%s] (%s) %s: %s\n" % [datetime, severity, progname, msg]
             else
-                "[%s] %s\n" % [datetime, msg]
+                "[%s] (%s) %s\n" % [datetime, severity, msg]
             end
         end
-    end
-
-    # Returns our proxy logger so we can do `log.info` instead of `@logger.info`
-    def log
-        @logger
     end
 
     # Sets the logging object to use
     #
     # @param [Logger] logger the Logger to use (duck typing works fine here)
     #
-    def logger=(logger)
+    def self.logger=(logger)
         # Set to false/nil to disable logging...
         unless logger
-            @logger = NilLogger.instance
+            $log = NilLogger.instance
             return
         end
 
-        if @logger
-            logger.level     = @logger.level
-            logger.formatter = @logger.formatter
-            @logger          = logger
+        if $log
+            logger.level     = $log.level
+            logger.formatter = $log.formatter
+            $log             = logger
         else
             logger.formatter = Formatter.new
-            @logger          = logger
+            $log             = logger
         end
     end
 
@@ -87,15 +85,15 @@ module Loggable
     #
     # @param [Symbol] level the level to log
     #
-    def log_level=(level)
+    def self.log_level=(level)
         case level
-            when :none    then @logger       = nil
-            when :fatal   then @logger.level = Logger::FATAL
-            when :error   then @logger.level = Logger::ERROR
-            when :warning then @logger.level = Logger::WARN
-            when :info    then @logger.level = Logger::INFO
-            when :debug   then @logger.level = Logger::DEBUG
-            else               @logger.level = Logger::WARN
+            when :none    then $log       = nil
+            when :fatal   then $log.level = Logger::FATAL
+            when :error   then $log.level = Logger::ERROR
+            when :warning then $log.level = Logger::WARN
+            when :info    then $log.level = Logger::INFO
+            when :debug   then $log.level = Logger::DEBUG
+            else               $log.level = Logger::WARN
         end
     end
 end

@@ -27,7 +27,7 @@ class User
     attr_reader :uid
 
     # Creates a new user and adds it to the list keyed by UID
-    def initialize(server, nick, user, host, ip, real, umodes, uid, ts, logger)
+    def initialize(server, nick, user, host, ip, real, umodes, uid, ts)
         @server    = server
         @nickname  = nick
         @username  = user
@@ -37,19 +37,17 @@ class User
         @uid       = uid
         @timestamp = ts
         @modes     = []
-        @logger    = nil
 
         @status_modes = {}
-        self.logger   = logger
 
-        log.error "new user replacing user with same UID!" if @@users[uid]
+        $log.error "new user replacing user with same UID!" if @@users[uid]
 
         # Do our user modes
         parse_modes(umodes)
 
         @@users[uid] = self
 
-        log.debug "new user: #{nick}!#{user}@#{host} (#{real}) [#{uid}]"
+        $log.debug "new user: #{nick}!#{user}@#{host} (#{real}) [#{uid}]"
 
         $eventq.post(:user_added, self)
     end

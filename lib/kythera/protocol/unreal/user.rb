@@ -47,7 +47,7 @@ class User
                      'z' => :ssl }
 
     # Creates a new user and adds it to the list keyed by nick
-    def initialize(server, nick, user, host, real, ts, logger)
+    def initialize(server, nick, user, host, real, ts)
         @server    = server
         @nickname  = nick
         @username  = user
@@ -55,16 +55,14 @@ class User
         @realname  = real
         @timestamp = ts
         @modes     = []
-        @logger    = nil
 
         @status_modes = {}
-        self.logger   = logger
 
-        log.error "new user replacing user with same nick!" if @@users[nick]
+        $log.error "new user replacing user with same nick!" if @@users[nick]
 
         @@users[nick] = self
 
-        log.debug "new user: #{nick}!#{user}@#{host} (#{real})"
+        $log.debug "new user: #{nick}!#{user}@#{host} (#{real})"
 
         $eventq.post(:user_added, self)
     end
@@ -82,7 +80,7 @@ class User
     # @param [String] host the hostname to use
     #
     def hostname=(host)
-        log.debug "changing #{@nickname}'s host from #{@hostname} to #{host}"
+        $log.debug "changing #{@nickname}'s host from #{@hostname} to #{host}"
         @hostname = host
     end
 end

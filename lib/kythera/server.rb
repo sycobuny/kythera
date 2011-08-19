@@ -10,8 +10,6 @@ require 'kythera'
 
 # This is just a base class. All protocol module should monkeypatch this.
 class Server
-    include Loggable
-
     # A list of all servers. The protocol module should decide what the key is.
     @@servers = {}
 
@@ -33,10 +31,8 @@ class Server
     attr_reader :users
 
     # Creates a new server. Should be patched by the protocol module.
-    def initialize(logger)
-        @logger     = nil
-        @users      = []
-        self.logger = logger
+    def initialize
+        @users = []
     end
 
     public
@@ -47,7 +43,7 @@ class Server
     #
     def add_user(user)
         @users << user
-        log.debug "user joined #{@name}: #{user.nickname}"
+        $log.debug "user joined #{@name}: #{user.nickname}"
     end
 
     # Deletes a User as a member
@@ -56,6 +52,6 @@ class Server
     #
     def delete_user(user)
         @users.delete(user)
-        log.debug "user left #{@name}: #{user.nickname} (#{@users.length})"
+        $log.debug "user left #{@name}: #{user.nickname} (#{@users.length})"
     end
 end

@@ -14,17 +14,14 @@ class Server
     attr_reader :sid
 
     # Creates a new Server and adds it to the list keyed by SID
-    def initialize(sid, logger)
+    def initialize(sid)
         @sid    = sid
         @users  = []
-        @logger = nil
 
-        self.logger = logger
-
-        log.error "new server replacing server with same SID!" if @@servers[sid]
+       $log.error "new server replacing server with same SID!" if @@servers[sid]
 
         @@servers[sid] = self
 
-        log.debug "new server initialized: #{@sid}"
+       $log.debug "new server initialized: #{@sid}"
     end
 end

@@ -12,19 +12,16 @@ require 'kythera'
 # This reopens the base Server class in `kythera/server.rb`
 class Server
     # Creates a new Server and adds it to the list keyed by numeric
-    def initialize(name, logger)
+    def initialize(name)
         @name   = name
         @users  = []
-        @logger = nil
-
-        self.logger = logger
 
         if @@servers[name]
-            log.error "new server replacing server with same name!"
+            $log.error "new server replacing server with same name!"
         end
 
         @@servers[name] = self
 
-        log.debug "new server initialized: #{@name}"
+        $log.debug "new server initialized: #{@name}"
     end
 end

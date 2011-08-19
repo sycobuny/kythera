@@ -62,7 +62,7 @@ module Protocol::Unreal
 
         @sendq << str
 
-        User.new(nil, nick, user, host, real, ts, @logger)
+        User.new(nil, nick, user, host, real, ts)
     end
 
     # :source PRIVMSG target :message

@@ -42,10 +42,9 @@ class DNSBLService < Service
     # Called by the daemon when we connect to the uplink
     #
     # @param [Uplink] Uplink interface to the IRC server
-    # @param [Logger] Logger interface for logging
     #
-    def initialize(uplink, logger)
-        super # Prepare uplink/logger objects
+    def initialize(uplink)
+        super # Prepare uplink object
 
         # Shortcut to our configuration info
         @config = $config.dnsblserv
@@ -56,7 +55,7 @@ class DNSBLService < Service
         # Number of users currently waiting to be checked
         @needs_checking = 0
 
-        log.info "DNSBL Service loaded (version #{VERSION})"
+        $log.info "DNSBL Service loaded (version #{VERSION})"
 
         # We don't check users while we're bursting
         @bursting = true
@@ -92,14 +91,14 @@ class DNSBLService < Service
         @config.blacklists.each do |address|
             check_addr = "#{ip}.#{address}"
 
-            log.debug "dnsbl checking: #{check_addr}"
+            $log.debug "dnsbl checking: #{check_addr}"
 
             begin
                 Resolv.getaddress(check_addr)
             rescue Resolv::ResolvError
                 next
             else
-                log.info "dnsbl positive: #{check_addr}"
+                $log.info "dnsbl positive: #{check_addr}"
                 # XXX - set the kline!
 
                 # We don't need to check other lists since it's positive

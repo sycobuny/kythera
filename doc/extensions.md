@@ -45,14 +45,9 @@ application will utilize to introduce your clients and to send events your way:
             end
         end
 
-        # Your service is always initialized with the uplink and a logger
-        def initialize(uplink, logger)
-            # Calling `super` sets up the logger, and you don't have to
-            # do anything else with it. The logger works as:
-            #   log.info 'hello...'
-            #   log.debug 'hello...'
-            #
-            # Calling this also sets `@uplink` to the argument provided.
+        # Your service is always initialized with the uplink
+        def initialize(uplink)
+            # Calling super sets `@uplink` to the argument provided.
             # The uplink contains the methods you'll use to communicate
             # with the IRC server.
             #
