@@ -84,9 +84,15 @@ class Kythera
         open('var/kythera.pid', 'w') { |f| f.puts Process.pid }
 
         # Enter the main event loop
-        main_loop
+        begin
+            main_loop
+        rescue Exception => err
+            $log.fatal("exception in main_loop: #{err}")
+            $log.fatal("backtrace: #{err.backtrace}")
+            exit_app
+        end
 
-        # If we get to here we're exiting
+        # If we get to here we're exiting (this is a normal termination)
         exit_app
     end
 
