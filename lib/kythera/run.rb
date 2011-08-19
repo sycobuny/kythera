@@ -133,6 +133,12 @@ class Kythera
 
     # Connects to the uplink
     def connect
+        # Clear all non-persistent Timers
+        Timer.stop
+
+        # Reset Services, as they're instantiated upon connection
+        Service.services.clear
+
         if @uplink
             log.debug "current uplink failed, trying next"
 
@@ -140,12 +146,12 @@ class Kythera
             curruli += 1
             curruli  = 0 if curruli > ($config.uplinks.length - 1)
 
-            $eventq = EventQueue.new @logger
+            $eventq = EventQueue.new(@logger)
             @uplink = Uplink.new($config.uplinks[curruli], @logger)
 
             sleep $config.me.reconnect_time
         else
-            $eventq = EventQueue.new @logger
+            $eventq = EventQueue.new(@logger)
             @uplink = Uplink.new($config.uplinks[0], @logger)
         end
 

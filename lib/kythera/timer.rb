@@ -14,18 +14,20 @@ class Timer
     @@timers = []
 
     # instance attributes
-    attr_reader :time, :timeout, :repeat
+    attr_reader :time, :timeout, :repeat, :persist
 
     # Creates a new timer to be executed within 10 seconds of +time+.
     #
     # @param [Fixnum] time time in seconds
     # @param [Boolean] repeat keep executing every 'time' seconds?
+    # @param [Boolean] persist keep the timer around through disconnections?
     # @param [Proc] block the code block to execute
     #
-    def initialize(time, repeat = false, &block)
+    def initialize(time, repeat = false, persist = false, &block)
         @time    = time.to_i
         @timeout = Time.now.to_f + @time
         @repeat  = repeat
+        @persist = persist
         @block   = block
 
         @@timers << self
@@ -43,7 +45,7 @@ class Timer
     # @param [Proc] block the code block to execute
     #
     def Timer.every(time, &block)
-        new(time, true, &block)
+        new(time, true, false, &block)
     end
 
     # Alias for new, sets up the block to not repeat by default
@@ -52,7 +54,25 @@ class Timer
     # @param [Proc] block the code block to execute
     #
     def Timer.after(time, &block)
-        new(time, false, &block)
+        new(time, false, false, &block)
+    end
+
+    # Alias for new, sets up the block to repeat and persist by default
+    #
+    # @param [Fixnum] time how often to repeat, in seconds
+    # @param [Proc] block the code block to execute
+    #
+    def Timer.persist_every(time, &block)
+        new(time, true, true, &block)
+    end
+
+    # Alias for new, sets up the block to not repeat but persist by default
+    #
+    # @param [Fixnum] time how long to wait, in seconds
+    # @param [Proc] block the code block to execute
+    #
+    def Timer.persist_after(time, &block)
+        new(time, false, true, &block)
     end
 
     # Stops all timers
@@ -69,9 +89,10 @@ class Timer
         @@timers.collect { |t| t.timeout }.min
     end
 
-
     # Kills the thread we're in
     def stop
+        return if @persist
+
         @@timers.delete(self)
         @thread.exit
     end

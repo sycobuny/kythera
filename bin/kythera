@@ -7,8 +7,8 @@
 # Rights to this code are documented in doc/license.txt
 #
 
+$LOAD_PATH.unshift File.expand_path('../',    File.dirname(__FILE__))
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
-$LOAD_PATH.unshift File.expand_path('../ext', File.dirname(__FILE__))
 
 require 'kythera'
 
@@ -57,6 +57,16 @@ configure do
         # none, fatal, error, warning, info, debug
         #
         logging :info
+
+        # What should we do when we come across an incompatible extension?
+        # Extensions are considered incompatible when they report that they do
+        # not work with the current version of Kythera.
+        #
+        # :die    -- exit the application
+        # :warn   -- print a warning and unload the extension
+        # :ignore -- load the extension anyway and hope for the best
+        #
+        unsafe_extensions :die
 
         # The number of seconds between uplink connection attempts.
         reconnect_time 10

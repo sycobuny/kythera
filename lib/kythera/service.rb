@@ -9,7 +9,7 @@
 require 'kythera'
 
 # This is the base class for a service. All services modules must subclass this.
-# For the full documentation see `doc/SERVICES.md`
+# For the full documentation see `doc/extensions.md`
 #
 class Service
     include Loggable

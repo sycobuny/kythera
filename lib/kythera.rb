@@ -34,6 +34,7 @@ require 'kythera/loggable'
 require 'kythera/channel'
 require 'kythera/database'
 require 'kythera/event'
+require 'kythera/extension'
 require 'kythera/protocol'
 require 'kythera/run'
 require 'kythera/securerandom'
@@ -43,10 +44,8 @@ require 'kythera/timer'
 require 'kythera/uplink'
 require 'kythera/user'
 
-# Require all of our services and extensions
-Dir.glob(['ext/*rb']) do |filepath|
-    require filepath.split(File::SEPARATOR, 2)[-1]
-end
+# Require all of our extensions
+Dir.glob(['ext/**/extension.rb']) { |filepath| require filepath }
 
 # Starts the parsing of the configuraiton DSL
 #
@@ -73,6 +72,9 @@ def configure(&block)
 
     # Make sure the configuration information is valid
     Kythera.verify_configuration
+
+    # Verify extension compatibility
+    Extension.verify_and_load
 
     # Configuration is solid, now let's actually start up
     Kythera.new
@@ -197,6 +199,10 @@ module Kythera::Configuration::Daemon
 
     def logging(level)
         self.logging = level
+    end
+
+    def unsafe_extensions(action)
+        self.unsafe_extensions = action
     end
 
     def reconnect_time(time)
