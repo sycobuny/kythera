@@ -7,17 +7,21 @@
 #
 
 # Check for our dependencies before doing _anything_ else
-begin
-    lib = nil
-    %w(rubygems sequel sqlite3).each do |m|
-        lib = m
-        require lib
+DEPENDENCIES = { 'sequel'   => '~> 3.23',
+                 'sqlite3'  => '~> 1.3' }
+
+DEPENDENCIES.each do |name, reqs|
+    dep  = Gem::Dependency.new(name, reqs)
+    spec = Gem.source_index.search(dep)
+
+    if spec.empty?
+        puts "kythera: depends on #{name} #{reqs}"
+        puts "kythera: this library is required for operation"
+        puts "kythera: gem install --remote #{name}"
+        abort
+    else
+        require name
     end
-rescue LoadError
-    puts "kythera: could not load #{lib}"
-    puts "kythera: this library is required for operation"
-    puts "kythera: gem install --remote #{lib}"
-    abort
 end
 
 # Require all the Ruby stdlib stuff we need
@@ -45,7 +49,7 @@ require 'kythera/uplink'
 require 'kythera/user'
 
 # Require all of our extensions
-Dir.glob(['ext/**/extension.rb']) { |filepath| require filepath }
+Dir.glob(['extensions/**/extension.rb']) { |filepath| require filepath }
 
 # Starts the parsing of the configuraiton DSL
 #

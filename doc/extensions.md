@@ -6,7 +6,7 @@
 Extensions Interface
 ====================
 
-All files matching `lib/kythera/service/*.rb` and `ext/*.rb` are autoloaded.
+All files matching `extensions/**/extension.rb` are autoloaded.
 A good structure would be:
 
   * `lib/kythera/service/chanserv.rb`

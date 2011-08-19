@@ -10,6 +10,7 @@
 $LOAD_PATH.unshift File.expand_path('../',    File.dirname(__FILE__))
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
 
+require 'rubygems'
 require 'kythera'
 
 Dir.chdir File.expand_path('..', File.dirname(__FILE__))
@@ -38,6 +39,10 @@ Dir.chdir File.expand_path('..', File.dirname(__FILE__))
 # The actual configuration begins here
 configure do
     use Kythera::Configuration # Base configuration
+
+    # If you have any extensions that are installed from RubyGems,
+    # you can require them here.
+    #@require 'extension_gem'
 
     # This section of the configuration is dedicated to the general
     # behavior of the service as a whole.

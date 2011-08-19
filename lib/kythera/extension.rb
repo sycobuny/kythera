@@ -38,16 +38,29 @@ class Extension
                     puts "kythera: needs kythera version '#{kyver}'"
                 end
 
-
                 abort if $config.me.unsafe_extensions == :die
 
                 true
             end
         end
 
-        # Go ahead and load the ones that passed verification
+        # Check to see if the dependencies are satisfied
         @@extension_classes.each do |klass|
-            require "ext/#{klass::NAME}/#{klass::NAME}.rb"
+            kn = klass::NAME
+
+            klass::DEPENDENCIES.each do |n, reqs|
+                dep  = Gem::Dependency.new(n, reqs)
+                spec = Gem.source_index.search(dep)
+
+                if spec.empty?
+                    puts "kythera: extension '#{kn}' requires #{n} #{reqs}"
+                    puts "kythera: gem install --remote #{n}"
+                    abort
+                end
+            end
         end
+
+        # Go ahead and load the ones that passed verification
+        @@extension_classes.each { |klass| klass.initialize }
     end
 end
