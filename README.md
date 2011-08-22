@@ -85,8 +85,8 @@ This application is completely original. I'm sure to receive patches from other
 contributors from time to time, and this will be indicated in SCM commits.
 
     Lead Developer  rakaur    Eric Will          rakaur@malkier.net
+    Developer       sycobuny  Stephen Belcher    sycobuny@malkier.net
     Developer       andrew    Andrew Herbig      goforit7arh@gmail.com
-    Database        sycobuny  Stephen Belcher    sycobuny@malkier.net
     Contributor     xiphias   Michael Rodriguez  xiphias@khaydarin.net
     Tester          rintaun   Matt Lanigan       rintaun@projectxero.net
     

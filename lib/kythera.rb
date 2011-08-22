@@ -6,12 +6,18 @@
 # Rights to this code are documented in doc/license.txt
 #
 
+# Check for latest RubyGems version
+unless Gem::VERSION >= '1.8.6'
+    puts "kythera: depends on rubygems >= 1.8.6"
+    puts "kythera: gem update --system"
+    abort
+end
+
 # Check for our dependencies before doing _anything_ else
 DEPENDENCIES = { 'sequel'   => '~> 3.23',
                  'sqlite3'  => '~> 1.3' }
 
 DEPENDENCIES.each do |name, reqs|
-
     spec = Gem::Specification.find_all_by_name(name, reqs)
 
     if spec.empty?
@@ -115,9 +121,6 @@ module Kythera::Configuration
 
     # Holds the settings for the uplink section
     attr_reader :uplinks
-
-    # Holds the settings for services
-    attr_reader :services
 
     # Reports an error about an unknown directive
     def method_missing(meth, *args, &block)
