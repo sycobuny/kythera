@@ -11,10 +11,11 @@ require 'kythera'
 require 'kythera/service/shrike/commands'
 require 'kythera/service/shrike/configuration'
 
-$config.extend(Shrike::Configuration)
-
 # This service is designed to implement the functionality of Shrike IRC Services
 class Shrike < Service
+    # Our name (for use in the config, etc)
+    NAME = :shrike
+
     # For backwards-incompatible changes
     V_MAJOR = 0
 

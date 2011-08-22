@@ -18,6 +18,14 @@ class Service
     # A list of all instantiated services
     @@services = []
 
+    # Attribute reader for `@@services_classes`
+    #
+    # @return [Array] a list of all services classes
+    #
+    def self.services_classes
+        @@services_classes
+    end
+
     # Attribute reader for `@@services`
     #
     # @return [Array] a list of all services

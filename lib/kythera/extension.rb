@@ -13,20 +13,28 @@ require 'kythera'
 #
 class Extension
     # A list of all extension classes
-    @@extension_classes = []
+    @@extensions = []
+
+    # Attribute reader for `@@extensions`
+    #
+    # @return [Array] a list of all extensions
+    #
+    def self.extensions
+        @@extensions
+    end
 
     # Detect when we are subclassed
     #
     # @param [Class] klass the class that subclasses us
     #
     def self.inherited(klass)
-        @@extension_classes << klass
+        @@extensions << klass
     end
 
     # Verify loaded extensions work with our version
     def self.verify_and_load
         # Remove the incompatible ones
-        @@extension_classes.delete_if do |klass|
+        @@extensions.delete_if do |klass|
             kyver = Gem::Requirement.new(klass::KYTHERA_VERSION)
 
             unless kyver.satisfied_by?(Gem::Version.new(Kythera::VERSION))
@@ -45,12 +53,11 @@ class Extension
         end
 
         # Check to see if the dependencies are satisfied
-        @@extension_classes.each do |klass|
+        @@extensions.each do |klass|
             kn = klass::NAME
 
             klass::DEPENDENCIES.each do |n, reqs|
-                dep  = Gem::Dependency.new(n, reqs)
-                spec = Gem.source_index.search(dep)
+                spec = Gem::Specification.find_all_by_name(n, reqs)
 
                 if spec.empty?
                     puts "kythera: extension '#{kn}' requires #{n} #{reqs}"
@@ -60,7 +67,17 @@ class Extension
             end
         end
 
-        # Go ahead and load the ones that passed verification
-        @@extension_classes.each { |klass| klass.initialize }
+        # Load the ones that passed verification
+        @@extensions.each do |klass|
+            # Does this extension have a configuration block?
+            if $state[:ext_cfg] and $state[:ext_cfg][klass::NAME.to_sym]
+                klass.initialize($state[:ext_cfg][klass::NAME.to_sym])
+            else
+                klass.initialize
+            end
+        end
+
+        # Clear the extension configuration blocks
+        $state.delete(:ext_cfg)
     end
 end

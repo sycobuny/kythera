@@ -11,8 +11,8 @@ DEPENDENCIES = { 'sequel'   => '~> 3.23',
                  'sqlite3'  => '~> 1.3' }
 
 DEPENDENCIES.each do |name, reqs|
-    dep  = Gem::Dependency.new(name, reqs)
-    spec = Gem.source_index.search(dep)
+
+    spec = Gem::Specification.find_all_by_name(name, reqs)
 
     if spec.empty?
         puts "kythera: depends on #{name} #{reqs}"
@@ -116,23 +116,88 @@ module Kythera::Configuration
     # Holds the settings for the uplink section
     attr_reader :uplinks
 
+    # Holds the settings for services
+    attr_reader :services
+
     # Reports an error about an unknown directive
     def method_missing(meth, *args, &block)
        puts "kythera: unknown configuration directive '#{meth}' (ignored)"
     end
 
-    # Loads a service module
+    # Load a service and parse its configuration
     #
-    # @param [Symbol] name name of service to load
+    # The configuration will be placed at $config.name_of_service
     #
-    def service(name)
+    # @param [Symbol] name name of the service
+    #
+    def service(name, &block)
+        # Start by loading the service
         begin
-            require "kythera/service/#{name}.rb"
+            require "kythera/service/#{name}"
         rescue LoadError
-            puts "kythera: error loading Service '#{name}'"
+            puts "kythera: couldn't load service: #{name} (ignored)"
+            return
+        end
+
+        # Find the Service's class
+        srv = Service.services_classes.find { |s| s::NAME == name }
+
+        begin
+            # Find the Service's configuration methods
+            srv_config_parser = srv::Configuration
+        rescue NameError
+            puts "kythera: service has no configuration handlers: #{name}"
+        else
+            # Parse the configuration block
+            srv_config = OpenStruct.new
+            srv_config.extend(srv_config_parser)
+            srv_config.instance_eval(&block)
+
+            # Store it in $config
+            instance_variable_set("@#{srv::NAME}", srv_config)
+
+            # Make it readable
+            Kythera::Configuration.class_exec do
+                attr_reader srv::NAME
+            end
         end
     end
 
+    # Load an extension's configuration
+    #
+    # If an extension provides configuration methods, this method parses the
+    # configuration into an OpenStruct like the rest of the configuration and
+    # stores it in `$state`. When the extension is verified & loaded, the
+    # OpenStruct will be passed to its initialize method. If it fails
+    # verification it will be erased.
+    #
+    # @param [Symbol] name the name of the extension
+    #
+    def extension(name, &block)
+        $state[:ext_cfg] ||= {}
+
+        # Find the Extension's class
+        ext = Extension.extensions.find { |e| e::NAME == name }
+
+        unless ext
+            puts "kythera: unknown extension configuration: #{name} (ignored)"
+        else
+            begin
+                # Find the Extension's configuration methods
+                ext_config_parser = ext::Configuration
+            rescue NameError
+                puts "kythera: extension has no configuration handlers: #{name}"
+            else
+                # Parse the configuration block
+                ext_config = OpenStruct.new
+                ext_config.extend(ext_config_parser)
+                ext_config.instance_eval(&block)
+
+                # Store it in $state[:ext_cfg]
+                $state[:ext_cfg][ext::NAME] = ext_config
+            end
+        end
+    end
 
     # Parses the `daemon` section of the configuration
     #
@@ -142,7 +207,7 @@ module Kythera::Configuration
         return if @me
 
         @me = OpenStruct.new
-        @me.extend Kythera::Configuration::Daemon
+        @me.extend(Kythera::Configuration::Daemon)
         @me.instance_eval(&block)
     end
 
@@ -156,7 +221,7 @@ module Kythera::Configuration
         ul.host = host.to_s
         ul.port = port.to_i
 
-        ul.extend Kythera::Configuration::Uplink
+        ul.extend(Kythera::Configuration::Uplink)
         ul.instance_eval(&block)
 
         (@uplinks ||= []) << ul

@@ -262,6 +262,7 @@ module Database
         end
     end
 
+    # Just a join table
     class ChannelFlag < Sequel::Model
         many_to_one :channel
         include GenericFlag

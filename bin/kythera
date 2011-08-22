@@ -144,12 +144,9 @@ configure do
     # XXX abort "You really should read ALL of your configuration file!"
 
     # This section of the configuration describes the behavior of the Shrike
-    # service. If it is not specified or is empty, shrike is disabled. If
-    # disabled, the configuration options will not parse.
+    # service. If it is not specified or is empty, shrike is disabled.
     #
-    service :shrike # Comment to disable
-
-    shrike_service do
+    service :shrike do
         # The client's nickname on IRC
         nickname :X
 
@@ -175,12 +172,9 @@ configure do
     # check connecting users on the network against. These lists contain
     # addresses of known open proxy servers and other malicious things. This
     # service does not appear on the network as a client. If this section is not
-    # specified or is empty, the service is disabled. If disabled, the
-    # configuration options will not parse.
+    # specified or is empty, the service is disabled.
     #
-    service :dnsblserv # Comment to disable
-
-    dnsbl_service do
+    service :dnsblserv do
         # The EFnetRBL is huge and very accurate
         # See http://rbl.efnet.org/
         #
@@ -210,4 +204,11 @@ configure do
         #
         delay 2
     end
+
+    # This is an example configuration block for the example extension and
+    # exists to serve as an educational tool for extension developers.
+    #
+    #extension :example do
+    #    example_setting :example
+    #end
 end

@@ -88,7 +88,7 @@ class Kythera
             main_loop
         rescue Exception => err
             $log.fatal("exception in main_loop: #{err}")
-            $log.fatal("backtrace: #{err.backtrace}")
+            $log.fatal("backtrace: #{err.backtrace.join("\n\t\t\t")}")
             exit_app
         end
 
@@ -149,7 +149,7 @@ class Kythera
             curruli += 1
             curruli  = 0 if curruli > ($config.uplinks.length - 1)
 
-            $eventq = EventQueue
+            $eventq = EventQueue.new
             @uplink = Uplink.new($config.uplinks[curruli])
 
             sleep $config.me.reconnect_time

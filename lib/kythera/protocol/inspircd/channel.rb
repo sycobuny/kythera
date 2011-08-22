@@ -50,10 +50,6 @@ class Channel
                        'y' => :operprefix,
                        'z' => :ssl_only }
 
-    def self.status_modes
-        @@status_modes
-    end
-
     # The channel's timestamp
     attr_reader :timestamp
 

@@ -11,10 +11,8 @@ require 'kythera'
 class ExampleExtension
     # If you get here, you're loaded and ready to go
 
-    def initialize
+    def initialize(config)
+        @config = config
         #puts "ExampleExtension has been initialized!"
     end
 end
-
-# It's up to you to actually run any of your code
-my_ext = ExampleExtension.new

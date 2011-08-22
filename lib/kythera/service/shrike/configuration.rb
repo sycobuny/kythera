@@ -8,24 +8,8 @@
 
 require 'kythera'
 
-# This is extended into $config
-module Shrike::Configuration
-    # This will be $config.shrike
-    attr_reader :shrike
-
-    # Implements the 'shrike_service' portion of the config
-    def shrike_service(&block)
-        return if @shrike
-
-        @shrike = OpenStruct.new
-        @shrike.extend(Shrike::Configuration::Methods)
-
-        @shrike.instance_eval(&block)
-    end
-end
-
 # Contains the methods that do the config parsing
-module Shrike::Configuration::Methods
+module Shrike::Configuration
     # Adds methods to the parser from an arbitrary module
     #
     # @param [Module] mod the module containing methods to add

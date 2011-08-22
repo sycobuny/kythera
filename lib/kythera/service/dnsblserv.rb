@@ -13,6 +13,9 @@ require 'resolv'
 
 # Provides a DNSBL-checking service
 class DNSBLService < Service
+    # Our name (for use in the config, etc)
+    NAME = :dnsblserv
+
     # Backwards-incompatible changes
     V_MAJOR = 1
 
@@ -20,7 +23,7 @@ class DNSBLService < Service
     V_MINOR = 0
 
     # Minor changes and bugfixes
-    V_PATCH = 0
+    V_PATCH = 1
 
     # String representation of our version..
     VERSION = "#{V_MAJOR}.#{V_MINOR}.#{V_PATCH}"
@@ -69,6 +72,7 @@ class DNSBLService < Service
 
     private
 
+    # Add the user to our to-be-checked queue
     def queue_user(user)
         return if @bursting
 
@@ -80,8 +84,10 @@ class DNSBLService < Service
         @needs_checking += 1
     end
 
+    # Does the actual DNSBL lookup
     def check_user(user)
         return if @bursting
+        return if user.operator? # Don't scan opers
 
         # Reverse their IP bits
         m  = Resolv::IPv4::Regex.match(user.ip)
@@ -110,24 +116,8 @@ class DNSBLService < Service
     end
 end
 
-# This is extended into $config
-module DNSBLService::Configuration
-    # This will be $config.dnsblserv
-    attr_reader :dnsblserv
-
-    # Implements the 'dnsbl_service' portion of the config
-    def dnsbl_service(&block)
-        return if @dnsblserv
-
-        @dnsblserv = OpenStruct.new
-        @dnsblserv.extend(DNSBLService::Configuration::Methods)
-
-        @dnsblserv.instance_eval(&block)
-    end
-end
-
 # Contains the methods that do the config parsing
-module DNSBLService::Configuration::Methods
+module DNSBLService::Configuration
     # Adds methods to the parser from an arbitrary module
     #
     # @param [Module] mod the module containing methods to add
@@ -147,5 +137,3 @@ module DNSBLService::Configuration::Methods
         self.delay = seconds
     end
 end
-
-$config.extend(DNSBLService::Configuration)

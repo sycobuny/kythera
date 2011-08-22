@@ -13,6 +13,7 @@ module Database
     class Channel < Sequel::Model
     end
 
+    # Just a join table
     class ChannelUserFlag < Sequel::Model
         many_to_one :user
         many_to_one :channel

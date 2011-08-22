@@ -40,6 +40,15 @@ class Channel
         @@channels
     end
 
+    # Attribute reader for `@@status_modes`
+    #
+    # @return [Hash] a list of all status modes
+    #
+    def self.status_modes
+        @@status_modes
+    end
+
+
     # The channel name, including prefix
     attr_reader :name
 

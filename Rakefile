@@ -17,8 +17,8 @@ else
     $yard = true
 end
 
+$LOAD_PATH.unshift File.expand_path('.', File.dirname(__FILE__))
 $LOAD_PATH.unshift File.expand_path('lib', File.dirname(__FILE__))
-$LOAD_PATH.unshift File.expand_path('ext', File.dirname(__FILE__))
 
 require 'kythera'
 

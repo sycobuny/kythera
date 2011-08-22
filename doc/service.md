@@ -23,6 +23,9 @@ application will utilize to introduce your clients and to send events your way:
     require 'kythera'
 
     class ChanServ < Service
+        # You must provide a name. This is used for variable names and such.
+        NAME = :chanserv
+
         # You must provide this method. Check whether your config section
         # exists at all, whether required settings are defined or are invalid,
         # etc. Return a boolean value.
@@ -76,8 +79,53 @@ application will utilize to introduce your clients and to send events your way:
 So there's your service. That's all you have to do to get started, everything
 else (handling the PRIVMSG) is up to you.
 
-If you need help writing a configuration portion, for now take a look at
-`lib/kythera/service/shrike/configuration.rb`. I'll try to write it up later on.
+Configuration
+-------------
+
+Kythera uses a configuration DSL (domain-specific language) that actually
+consists of real Ruby code and is executed by Ruby. The gist of it is like this:
+you provide a module that has some methods that handle configuration directives,
+you create an `OpenStruct` and call `extend` on it providing your module as an
+argument. Then you execute the config DSL code in the context of that object.
+
+While that might sound scary, Kythera actually does most of that for you. All
+*you* need to do is provide the module with the methods. You put the module
+under the class that subclasses `Service`, and name it `Configuration`.
+If a configuration block exists in the configuration, it will be parsed and the
+resulting `OpenStruct` will be passed to your initialize method.
+
+So, picking up from the code provided above:
+
+    class ChanServ < Service
+        module Configuration
+            # You must always have private so that the method names do not
+            # interfere with your accessors. This is a side-effect of OpenStruct
+            #
+            private
+
+            def some_setting(some_value)
+                self.some_setting = some_value
+            end
+        end
+    end
+
+Then, in `bin/kythera` (the configuration)
+
+    configure do
+        service :chanserv do # Same as ChanServ::NAME
+            some_setting :some_value
+        end
+    end
+
+The resulting `OpenStruct` is placed in `$config.NAME`, in this case as
+`$config.chanserv`.
+
+Neat, huh?
+
+For more detailed configurations, check out `extensions/example/extension.rb`,
+and maybe `lib/kythera/service/shrike/configuration.rb'.`
+
+* * *
 
 Since this isn't anywhere near a finished product yet, this is likely to
 massively change. At the very least I plan to add methods similar to the

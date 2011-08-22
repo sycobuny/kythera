@@ -22,7 +22,7 @@ module Protocol::InspIRCd
     end
 
     # CAPAB START
-    # CAPAB CAPABILITIES :VAR=VALUE {[VAR=VALUE]}
+    # CAPAB CAPABILITIES :VAR=VALUE ...
     # CAPAB MODULES <module list>
     # CAPAB END
     def send_capab
@@ -47,7 +47,8 @@ module Protocol::InspIRCd
         @sendq << ":#{@config.sid} ENDBURST"
     end
 
-    # :<sid> UID <uid> <timestamp> <nick> <hostname> <displayed-hostname> <ident> <ip> <signon time> +<modes {mode params}> :<gecos>
+    # :<sid> UID <uid> <timestamp> <nick> <hostname> <displayed-hostname>
+    #            <ident> <ip> <signon time> +<modes [mode params]> :<gecos>
     def send_uid(nick, user, host, real, modes = '')
         ts    = Time.now.to_i
         ip    = @config.bind_host || '255.255.255.255'

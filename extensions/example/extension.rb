@@ -9,15 +9,25 @@
 require 'kythera'
 
 class ExampleExtensionHeader < Extension
-    NAME = 'example'
-    KYTHERA_VERSION = '~> 0.0'
+    NAME = :example
 
-    DEPENDENCIES = { 'sequel'   => '~> 3.23' }
+    KYTHERA_VERSION = '~> 0.0'
+    DEPENDENCIES    = { 'sequel'   => '~> 3.23' }
 
     # This is called if your versions are right and your dependencies are met.
     # The rest is up to you.
     #
-    def self.initialize
+    def self.initialize(config = nil)
         require 'extensions/example/example'
+        ExampleExtension.new(config)
+    end
+
+    # Our configuration methods
+    module Configuration
+        private
+
+        def example_setting(rvalue)
+            self.example_setting = rvalue
+        end
     end
 end
