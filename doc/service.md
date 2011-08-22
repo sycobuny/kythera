@@ -3,18 +3,8 @@
     Copyright (c) 2011 Eric Will <rakaur@malkier.net>
     Rights to this code are documented in doc/license.txt
 
-Extensions Interface
-====================
-
-All files matching `extensions/**/extension.rb` are autoloaded.
-A good structure would be:
-
-  * `lib/kythera/service/chanserv.rb`
-    * `lib/kythera/service/chanserv/file1.rb`
-    * `lib/kythera/service/chanserv/file2.rb`
-  * `ext/my_extension.rb`
-    * `ext/my_extension/file1.rb`
-    * `ext/my_extension/file2.rb`
+Service Interface
+=================
 
 Since your code is executed upon load, most things are taken care of
 automatically. So long as your service subclasses `Service`, your class will
@@ -33,11 +23,11 @@ application will utilize to introduce your clients and to send events your way:
     require 'kythera'
 
     class ChanServ < Service
-        # You must provide this method. Typically you determine whether your
-        # service is enabled or not by checking to see if your configuration
-        # settings exist. If not, they were commented out or unloaded.
+        # You must provide this method. Check whether your config section
+        # exists at all, whether required settings are defined or are invalid,
+        # etc. Return a boolean value.
         #
-        def self.enabled?
+        def self.verify_configuration
             if $config.respond_to?(:chanserv) and $config.chanserv
                 true
             else
