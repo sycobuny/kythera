@@ -19,7 +19,7 @@ class Server
         @sid    = sid
         @users  = []
 
-        $log.error "new server replacing server with same SID!" if @@servers[sid]
+        $log.error 'new server replacing server with same SID' if @@servers[sid]
 
         @@servers[sid] = self
 

@@ -227,6 +227,6 @@ class Kythera
     def exit_app
         $log.close if $log
         File.delete 'var/kythera.pid'
-        exit
+        exit!
     end
 end

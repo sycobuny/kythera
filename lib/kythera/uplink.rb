@@ -113,7 +113,7 @@ class Uplink
             self.dead = true
             return
         else
-            $log.info "successfully connected to #{@config.name}:#{@config.port}"
+            $log.info "connected to #{@config.name}:#{@config.port}"
 
             @connected = true
 
