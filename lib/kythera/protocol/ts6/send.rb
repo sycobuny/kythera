@@ -22,27 +22,27 @@ module Protocol::TS6
 
     # PASS <PASSWORD> TS <TS_CURRENT> :<SID>
     def send_pass
-        @sendq << "PASS #{@config.send_password} TS 6 :#{@config.sid}"
+        raw "PASS #{@config.send_password} TS 6 :#{@config.sid}"
     end
 
     # CAPAB :<CAPABS>
     def send_capab
-        @sendq << 'CAPAB :QS EX IE KLN UNKLN ENCAP'
+        raw 'CAPAB :QS EX IE KLN UNKLN ENCAP'
     end
 
     # SERVER <NAME> <HOPS> :<DESC>
     def send_server
-        @sendq << "SERVER #{$config.me.name} 1 :#{$config.me.description}"
+        raw "SERVER #{$config.me.name} 1 :#{$config.me.description}"
     end
 
     # SVINFO <MAX_TS_VERSION> <MIN_TS_VERSION> 0 :<TS>
     def send_svinfo
-        @sendq << "SVINFO 6 6 0 :#{Time.now.to_i}"
+        raw "SVINFO 6 6 0 :#{Time.now.to_i}"
     end
 
     # PONG <NAME> :<PARAM>
     def send_pong(param)
-        @sendq << "PONG #{$config.me.name} :#{param}"
+        raw "PONG #{$config.me.name} :#{param}"
     end
 
     # UID <NICK> 1 <TS> +<UMODES> <USER> <HOST> <IP> <UID> :<REAL>
@@ -58,28 +58,28 @@ module Protocol::TS6
         str  = "UID #{nick} 1 #{ts} #{modes} #{uname} #{host} #{ip} #{uid} :"
         str += real
 
-        @sendq << str
+        raw str
 
         User.new(nil, nick, uname, host, ip, real, modes, uid, ts)
     end
 
     # :UID PRIVMSG <TARGET_UID> :<MESSAGE>
     def send_privmsg(origin, target, message)
-        @sendq << ":#{origin} PRIVMSG #{target} :#{message}"
+        raw ":#{origin} PRIVMSG #{target} :#{message}"
     end
 
     # :UID NOTICE <TARGET_UID> :<MESSAGE>
     def send_notice(origin, target, message)
-        @sendq << ":#{origin} NOTICE #{target} :#{message}"
+        raw ":#{origin} NOTICE #{target} :#{message}"
     end
 
     # SJOIN <TS> <CHANNAME> +<CHANMODES> :<UIDS>
     def send_sjoin(channel, timestamp, uid)
-        @sendq << "SJOIN #{timestamp} #{channel} + :@#{uid}"
+        raw "SJOIN #{timestamp} #{channel} + :@#{uid}"
     end
 
     # :UID QUIT :<REASON>
     def send_quit(uid, reason)
-        @sendq << ":#{uid} QUIT :#{reason}"
+        raw ":#{uid} QUIT :#{reason}"
     end
 end

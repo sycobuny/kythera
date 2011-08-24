@@ -26,11 +26,11 @@ module Protocol::InspIRCd
     # CAPAB MODULES <module list>
     # CAPAB END
     def send_capab
-        @sendq << 'CAPAB START'
+        raw 'CAPAB START'
         # PROTOCOL is the only mandatory argument
-        @sendq << 'CAPAB CAPABILITIES :PROTOCOL=1201'
+        raw 'CAPAB CAPABILITIES :PROTOCOL=1201'
         # we're not a real server so we don't have any modules loaded
-        @sendq << 'CAPAB END'
+        raw 'CAPAB END'
     end
 
     # SERVER <servername> <password> <hopcount> <id> :<description>
@@ -38,13 +38,13 @@ module Protocol::InspIRCd
         str  = "SERVER #{$config.me.name} #{@config.send_password} 0 "
         str += "#{@config.sid} :#{$config.me.description}"
 
-        @sendq << str
+        raw str
     end
 
     def send_burst
-        @sendq << ":#{@config.sid} BURST #{Time.now.to_i}"
+        raw ":#{@config.sid} BURST #{Time.now.to_i}"
         # we don't have anything to burst, so don't send anything
-        @sendq << ":#{@config.sid} ENDBURST"
+        raw ":#{@config.sid} ENDBURST"
     end
 
     # :<sid> UID <uid> <timestamp> <nick> <hostname> <displayed-hostname>
@@ -61,28 +61,28 @@ module Protocol::InspIRCd
         str  = ":#{@config.sid} UID #{uid} #{ts} #{nick} #{host} #{host} "
         str += "#{user} #{ip} #{ts} #{modes} :#{real}"
 
-        @sendq << str
+        raw str
 
         User.new(nil, nick, user, host, ip, real, modes, uid, ts)
     end
 
     # :<sid> FJOIN <channel> <timestamp> +<modes> <params> :<statusmodes,uuid>
     def send_fjoin(channel, timestamp, uid)
-        @sendq << ":#{@config.sid} FJOIN #{channel} #{timestamp} + ,#{uid}"
+        raw ":#{@config.sid} FJOIN #{channel} #{timestamp} + ,#{uid}"
     end
 
     # :<source> PONG <source> :<destination>
     def send_pong(dest)
-        @sendq << ":#{@config.sid} PONG #{@config.sid} :#{dest}"
+        raw ":#{@config.sid} PONG #{@config.sid} :#{dest}"
     end
 
     # :source PRIVMSG target :message
     def send_privmsg(source, target, message)
-        @sendq << ":#{source} PRIVMSG #{target} :#{message}"
+        raw ":#{source} PRIVMSG #{target} :#{message}"
     end
 
     # :source NOTICE target :message
     def send_notice(source, target, message)
-        @sendq << ":#{source} NOTICE #{target} :#{message}"
+        raw ":#{source} NOTICE #{target} :#{message}"
     end
 end
