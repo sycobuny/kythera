@@ -128,9 +128,9 @@ module DNSBLService::Configuration
 
     private
 
-    def blacklist(address)
+    def blacklist(*addresses)
         self.blacklists ||= []
-        self.blacklists << address
+        self.blacklists.concat(addresses)
     end
 
     def delay(seconds)
