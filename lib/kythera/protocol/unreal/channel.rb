@@ -90,7 +90,7 @@ class Channel
     # @param [User] user User object to delete
     #
     def delete_user(user)
-        @members.delete user.uid
+        @members.delete user.nickname
 
         user.status_modes.delete(self)
 

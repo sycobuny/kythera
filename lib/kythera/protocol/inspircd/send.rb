@@ -68,7 +68,7 @@ module Protocol::InspIRCd
 
     # :<sid> FJOIN <channel> <timestamp> +<modes> <params> :<statusmodes,uuid>
     def send_fjoin(channel, timestamp, uid)
-        raw ":#{@config.sid} FJOIN #{channel} #{timestamp} + ,#{uid}"
+        raw ":#{@config.sid} FJOIN #{channel} #{timestamp} + o,#{uid}"
     end
 
     # :<source> PONG <source> :<destination>

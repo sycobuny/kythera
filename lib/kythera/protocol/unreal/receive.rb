@@ -296,8 +296,8 @@ module Protocol::Unreal
                 return unless channel
             end
 
+            modes  = parv[1]
             params = parv[GET_MODES_PARAMS]
-            modes  = params.delete_at(0)
 
             channel.parse_modes(modes, params)
         end
@@ -316,7 +316,7 @@ module Protocol::Unreal
 
         # Which one of our clients was it sent to?
         srv = Service.services.find do |s|
-            s.user.nickname == parv[0] if s.respond_to?(:user)
+            s.user.nickname.downcase == parv[0].downcase if s.respond_to?(:user)
         end
 
         # Send it to the service (if we found one)
