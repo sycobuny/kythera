@@ -13,6 +13,13 @@ $db = Sequel.sqlite('db/kythera.db')
 
 # Namespace to bind objects to the database
 module Database
+    # Returns the loaded version of the schema. This is useful for extensions
+    # that are loading models into the database, or just for the curious.
+    def self.version
+        @@version ||= $db['SELECT * FROM schema_info'].first[:version]
+        '%03d' % @@version
+    end
+
     # DRY - this code was duplicated in all *Flag objects
     module GenericFlag
         # Converts to a String
@@ -27,6 +34,4 @@ module Database
     end
 end
 
-require 'kythera/database/user'
-require 'kythera/database/channel'
-require 'kythera/database/channeluser'
+require 'kythera/database/account'

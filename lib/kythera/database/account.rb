@@ -31,18 +31,19 @@ module Database
 
             now  = Time.now
             salt = SecureRandom.base64(256)
-            pass = encrypt(password)
+            pass = encrypt(salt, password)
+            vt   = Digest::SHA2.hexdigest("--#{pass}--#{now.to_s}--")
 
-            vt = Digest::SHA2.hexdigest("--#{pass}--#{Time.now.to_s}--")
-
-            account = Account.new
-
+            account = new
             account.login        = login
             account.salt         = salt
             account.password     = pass
             account.verification = vt
             account.registered   = now
             account.last_login   = now
+
+            account.save
+            account
         end
 
         def self.identify(login, password)
@@ -61,11 +62,11 @@ module Database
         end
 
         def authenticated?()
-            @authenticated
+            @authenticated ||= false
         end
 
         def authenticates?(password)
-            password == encrypt(password)
+            self.password == encrypt(password)
         end
 
         def authenticate(password)
@@ -81,57 +82,57 @@ module Database
             pass = encrypt(password)
 
             if authenticates?(password)
-                self.update(:last_login    => Time.now,
-                            :failed_logins => 0)
-                @logged_in = true
+                self.update(:last_login => Time.now, :failed_logins => 0)
+                @authenticated = true
             else
-                self.update(:failed_logins => failed_logins + 1)
+                self.update(:failed_logins => self.failed_logins + 1)
                 raise PasswordMismatchError
             end
+
+            self
         end
 
         def logout!
-            @logged_in = false
+            @authenticated = false
         end
 
-        def validated?
-            validated.nil?
+        def verified?
+            self.verification.nil?
         end
 
-        def validates?(validation)
-            validated == self.validated
+        def verifies?(verification)
+            verification == self.verification
         end
 
-        def validate(validation)
+        def verify(verification)
             begin
-                validate!(validation)
+                verify!(verification)
                 true
-            rescue BadValidationError
+            rescue BadVerificationError
                 false
             end
         end
 
-        def validate!(validation)
-            if validates?(validation)
-                update(:validation => nil)
+        def verify!(verification)
+            if verifies?(verification)
+                self.update(:verification => nil)
             else
-                raise BadValidationError
+                raise BadVerificationError
             end
         end
 
         def [](key)
-            account_fields.find do |field|
-                key.to_s == f.key
-            end
+            field = account_fields.find { |f| key.to_s == f.key }
+            field ? field.value : nil
         end
 
         def []=(key, value)
             if field = account_fields.find { |f| key.to_s == f.key }
-                field.update(:value => value)
+                field.update(:value => value.to_s)
             else
                 field = AccountField.new
                 field.key   = key.to_s
-                field.value = value
+                field.value = value.to_s
 
                 account_fields << field
             end
@@ -155,9 +156,13 @@ module Database
         private
         #######
 
-        def encrypt(password)
+        def self.encrypt(salt, password)
             saltbytes = salt.unpack('m')[0]
-            Digest::SHA2.hexdigest(saltbytes + passwd)
+            Digest::SHA2.hexdigest(saltbytes + password)
+        end
+
+        def encrypt(password)
+            self.class.encrypt(self.salt, password)
         end
     end
 
