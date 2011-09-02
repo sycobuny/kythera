@@ -1,6 +1,6 @@
 #
 # kythera: services for IRC networks
-# lib/kythera/extension.rb: extensions interface
+# lib/kythera/database/account.rb: core account and accountfield models
 #
 # Copyright (c) 2011 Eric Will <rakaur@malkier.net>
 # Copyright (c) 2011 Stephen Belcher <sycobuny@malkier.net>
@@ -9,8 +9,10 @@
 
 require 'kythera'
 
-# This is the base class for an extension. All extensions must subclass this.
-# For the full documentation see `doc/extensions.md`
+# This is the core Account model which all services and extensions should use
+# for user management. While you can push directly into the database using
+# built-in Sequel ORM magic, it's advised you treat the class as read-only
+# except for the API specified here.
 #
 
 module Database
