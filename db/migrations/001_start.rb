@@ -39,5 +39,15 @@ Sequel.migration do
             primary_key [:account_id, :key]
             foreign_key [:account_id], :accounts
         end
+
+        create_table :extensions do
+            String  :name
+            Integer :version, :null => false
+
+            Integer :min_compat
+            Integer :max_compat
+
+            primary_key [:name]
+        end
     end
 end
